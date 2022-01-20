@@ -5,7 +5,8 @@ updates:
     package-ecosystem: github-actions
     rebase-strategy: auto
     schedule:
-      timezone: 05:00 UTC
+      interval: weekly
+      time: "04:00"
     assignees:
       - "kampfmoehre"
   - directory: /
@@ -13,6 +14,7 @@ updates:
     package-ecosystem: npm
     rebase-strategy: auto
     schedule:
-      timezone: 05:00 UTC
+      interval: daily
+      time: "04:00"
     assignees:
       - "kampfmoehre"
