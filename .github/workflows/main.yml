@@ -1,0 +1,76 @@
+name: main
+
+on:
+  push:
+
+jobs:
+  lint:
+    name: Check - Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use NodeJS
+        uses: actions/setup-node@v2.5.1
+      - name: Install packages
+        run: npm ci --no-fund --ignore-scripts
+      - name: Run ESLint
+        run: npx eslint --ext .ts,.js .
+  build:
+    name: Transpile TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use NodeJS
+        uses: actions/setup-node@v2.5.1
+      - name: Install packages
+        run: npm ci --no-fund --ignore-scripts
+      - name: Run ESLint
+        run: npx tsc
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: |
+            dist
+            !dist/test
+  test:
+    name: Coverage with Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        node: ["16"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use NodeJS
+        uses: actions/setup-node@v2.5.1
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install packages
+        run: npm ci --no-fund --ignore-scripts
+      - name: Collect Coverage
+        run: npx jest --coverage
+  release:
+    name: Semantic Release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+      - test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use NodeJS
+        uses: actions/setup-node@v2.5.1
+      - name: Install packages
+        run: npm ci --no-fund --ignore-scripts
+      - name: Download dist from build
+        uses: actions/download-artifact@v2.1.0
+        with:
+          name: dist
+          path: dist/
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
