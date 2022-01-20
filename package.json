@@ -59,6 +59,9 @@
     "semantic-release": "19.0.2",
     "typescript": "4.5.4"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "lint-staged": {
     "*.{ts,js,json,yml,md}": "prettier --write",
     "*.{ts,js}": "eslint --ext .js,.ts"
