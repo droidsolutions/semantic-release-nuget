@@ -36,7 +36,7 @@ describe("prepare", () => {
     ]);
   });
 
-  it("should use default dotnet commandi fn ot given", async () => {
+  it("should use default dotnet command if not given", async () => {
     const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
     execaMock.mockReturnValue({ exitCode: 0 } as ExecaReturnBase<string>);
 
@@ -73,7 +73,14 @@ describe("prepare", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "dotnet",
-      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "--include-symbols"]),
+      expect.arrayContaining([
+        "pack",
+        resolve("b"),
+        "-c",
+        "Release",
+        "--include-symbols",
+        "-p:SymbolPackageFormat=snupkg",
+      ]),
       { stdio: "inherit" },
     ]);
   });

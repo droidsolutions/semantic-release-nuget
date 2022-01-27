@@ -6,7 +6,7 @@ import { UserConfig } from "./UserConfig";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: Context): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
-  const registry = pluginConfig.nugetServer ?? "https://nuget.org";
+  const registry = pluginConfig.nugetServer ?? "https://api.nuget.org/v3/index.json";
   const project = resolve(dirname(resolve(pluginConfig.projectPath)), "bin", "Release");
   const baseCliArgs: string[] = ["nuget", "push"];
 

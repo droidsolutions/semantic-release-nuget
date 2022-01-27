@@ -13,7 +13,7 @@ export const prepare = async (pluginConfig: Config & UserConfig, context: Contex
       cliArgs.push("--include-source");
     }
     if (pluginConfig.includeSymbols === true) {
-      cliArgs.push("--include-symbols");
+      cliArgs.push("--include-symbols", "-p:SymbolPackageFormat=snupkg");
     }
 
     if (pluginConfig.usePackageVersion === true) {
