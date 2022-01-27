@@ -37,7 +37,15 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "dotnet",
-      ["nuget", "push", "-k", "104E4", expect.stringMatching(/^[\w\\/-]+\/src\/MyProject\/bin\/Release\/\*.nupkg$/)],
+      [
+        "nuget",
+        "push",
+        "-s",
+        "https://nuget.org",
+        "-k",
+        "104E4",
+        expect.stringMatching(/^[\w\\/-]+\/src\/MyProject\/bin\/Release\/\*.nupkg$/),
+      ],
       { stdio: "inherit" },
     ]);
   });
@@ -45,7 +53,7 @@ describe("publish", () => {
   it("should add argument for special NuGet server", async () => {
     await publish(
       {
-        nugetServer: "a",
+        nugetServer: "https://gitlab.com/mygroup/myproject",
         projectPath: "RootProject.csproj",
       },
       context,
@@ -54,7 +62,15 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "dotnet",
-      ["nuget", "push", "-k", "104E4", "-s", "a", expect.stringMatching(/^[\w\\/-]+\/bin\/Release\/\*.nupkg$/)],
+      [
+        "nuget",
+        "push",
+        "-s",
+        "https://gitlab.com/mygroup/myproject",
+        "-k",
+        "104E4",
+        expect.stringMatching(/^[\w\\/-]+\/bin\/Release\/\*.nupkg$/),
+      ],
       { stdio: "inherit" },
     ]);
   });
@@ -71,7 +87,15 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "/usr/lib64/dotnet",
-      ["nuget", "push", "-k", "104E4", expect.stringMatching(/^[\w\\/-]+\/MyProject\/bin\/Release\/\*.nupkg$/)],
+      [
+        "nuget",
+        "push",
+        "-s",
+        "https://nuget.org",
+        "-k",
+        "104E4",
+        expect.stringMatching(/^[\w\\/-]+\/MyProject\/bin\/Release\/\*.nupkg$/),
+      ],
       { stdio: "inherit" },
     ]);
   });

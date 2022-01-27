@@ -6,15 +6,12 @@ import { UserConfig } from "./UserConfig";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: Context): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
-  const registry = pluginConfig.nugetServer;
+  const registry = pluginConfig.nugetServer ?? "https://nuget.org";
   const project = resolve(dirname(resolve(pluginConfig.projectPath)), "bin", "Release");
   const baseCliArgs: string[] = ["nuget", "push"];
 
   try {
-    const cliArgs = [...baseCliArgs, "-k", process.env.NUGET_TOKEN!];
-    if (registry) {
-      cliArgs.push("-s", registry);
-    }
+    const cliArgs = [...baseCliArgs, "-s", registry, "-k", process.env.NUGET_TOKEN!];
 
     cliArgs.push(`${project}/*.nupkg`);
 
