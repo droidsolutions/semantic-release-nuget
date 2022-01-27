@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.0.1...v1.0.2) (2022-01-27)
+
+
+### Bug Fixes
+
+* **publish:** use nuget.org as default push source ([d0c7016](https://github.com/droidsolutions/semantic-release-nuget/commit/d0c7016c112d1891ef900dc3efe0b6f7f8b9d28d))
+
 ## [1.0.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.0.0...v1.0.1) (2022-01-20)
 
 
