@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.0.2...v1.0.3) (2022-01-27)
+
+
+### Bug Fixes
+
+* **publish:** use NuGet API url and snupkg ([6c64590](https://github.com/droidsolutions/semantic-release-nuget/commit/6c64590d6cdb02048b91bc11f03c81cacf81a6a5))
+
 ## [1.0.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.0.1...v1.0.2) (2022-01-27)
 
 
