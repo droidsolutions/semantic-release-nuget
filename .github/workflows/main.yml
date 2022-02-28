@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use NodeJS
-        uses: actions/setup-node@v2.5.1
+        uses: actions/setup-node@v3
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Run ESLint
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use NodeJS
-        uses: actions/setup-node@v2.5.1
+        uses: actions/setup-node@v3
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Run ESLint
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use NodeJS
-        uses: actions/setup-node@v2.5.1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
       - name: Install packages
@@ -61,7 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use NodeJS
-        uses: actions/setup-node@v2.5.1
+        uses: actions/setup-node@v3
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Download dist from build
