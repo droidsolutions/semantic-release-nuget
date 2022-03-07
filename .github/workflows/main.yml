@@ -65,7 +65,7 @@ jobs:
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Download dist from build
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist/
