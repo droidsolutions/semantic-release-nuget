@@ -44,7 +44,7 @@ describe("publish", () => {
         "https://api.nuget.org/v3/index.json",
         "-k",
         "104E4",
-        expect.stringMatching(/^[\w\\/-]+\/src\/MyProject\/bin\/Release\/\*.nupkg$/),
+        expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
       ],
       { stdio: "inherit" },
     ]);
@@ -69,7 +69,7 @@ describe("publish", () => {
         "https://gitlab.com/mygroup/myproject",
         "-k",
         "104E4",
-        expect.stringMatching(/^[\w\\/-]+\/bin\/Release\/\*.nupkg$/),
+        expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
       ],
       { stdio: "inherit" },
     ]);
@@ -94,7 +94,7 @@ describe("publish", () => {
         "https://api.nuget.org/v3/index.json",
         "-k",
         "104E4",
-        expect.stringMatching(/^[\w\\/-]+\/MyProject\/bin\/Release\/\*.nupkg$/),
+        expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
       ],
       { stdio: "inherit" },
     ]);

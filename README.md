@@ -60,15 +60,15 @@ The NuGet server authentication is **required** and can be set via [environment 
 
 ### Options
 
-| Options             | Description                                                     | Default     |
-| ------------------- | --------------------------------------------------------------- | ----------- |
-| `nugetServer`       | The URL of the NuGet server to push the package to.             | `nuget.org` |
-| `projectPath`       | The relative path to the project file to pack.                  |             |
-| `includeSymbols`    | If true Debug symbols will be included in the package.          | `false`     |
-| `includeSource`     | If true source code will be included in the package.            | `false`     |
-| `dotnet`            | The path to the dotnet executable if not in PATH.               | `dotnet`    |
-| `publishToGitLab`   | If true, package will also be published to the GitLab registry. | `false`     |
-| `usePackageVersion` | If true, version is directly set via dotnet pack argument.      | `false`     |
+| Options             | Description                                                                                      | Default     |
+| ------------------- | ------------------------------------------------------------------------------------------------ | ----------- |
+| `nugetServer`       | The URL of the NuGet server to push the package to.                                              | `nuget.org` |
+| `projectPath`       | The relative path to the project file to pack. Can also be an array including multiple projects. |             |
+| `includeSymbols`    | If true Debug symbols will be included in the package.                                           | `false`     |
+| `includeSource`     | If true source code will be included in the package.                                             | `false`     |
+| `dotnet`            | The path to the dotnet executable if not in PATH.                                                | `dotnet`    |
+| `publishToGitLab`   | If true, package will also be published to the GitLab registry.                                  | `false`     |
+| `usePackageVersion` | If true, version is directly set via dotnet pack argument.                                       | `false`     |
 
 **Note**: If `usePackageVersion` is set the version from Semantic Release is given directly to the `dotnet pack` command via the `-p:PackageVersion=<version>` argument. In this case any existing version in project files are ignored.
 
@@ -152,3 +152,27 @@ No configure Semantic Release and use the update file plugin to update values in
   ]
 }
 ```
+
+### Multiple packages
+
+You can build multiple NuGet packages from one repositories. To do this, specify the relative paths to the projects. Instead of
+
+```json
+{
+  "projectPath": "src/DroidSolutions.SemanticVersion/DroidSolutions.SemanticVersion.csproj"
+}
+```
+
+you could also use something like this:
+
+```json
+{
+  "projectPath": [
+    "src/DroidSolutions.Oss.JobService/DroidSolutions.Oss.JobService.csproj",
+    "src/DroidSolutions.Oss.JobService.EFCore/DroidSolutions.Oss.JobService.EFCore.csproj",
+    "src/DroidSolutions.Oss.JobService.Postgres/DroidSolutions.Oss.JobService.Postgres.csproj"
+  ]
+}
+```
+
+All NuGet packages will be in the `out` directory in project root.

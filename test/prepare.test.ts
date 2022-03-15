@@ -31,7 +31,7 @@ describe("prepare", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "a",
-      expect.arrayContaining(["pack", resolve("b"), "-c", "Release"]),
+      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "-o", "out"]),
       { stdio: "inherit" },
     ]);
   });
@@ -45,7 +45,7 @@ describe("prepare", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "dotnet",
-      expect.arrayContaining(["pack", resolve("b"), "-c", "Release"]),
+      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "-o", "out"]),
       { stdio: "inherit" },
     ]);
   });
@@ -59,7 +59,7 @@ describe("prepare", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "dotnet",
-      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "--include-source"]),
+      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "-o", "out", "--include-source"]),
       { stdio: "inherit" },
     ]);
   });
@@ -78,6 +78,8 @@ describe("prepare", () => {
         resolve("b"),
         "-c",
         "Release",
+        "-o",
+        "out",
         "--include-symbols",
         "-p:SymbolPackageFormat=snupkg",
       ]),
@@ -105,7 +107,7 @@ describe("prepare", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "dotnet",
-      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "-p:PackageVersion=1.0.0"]),
+      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "-o", "out", "-p:PackageVersion=1.0.0"]),
       { stdio: "inherit" },
     ]);
   });

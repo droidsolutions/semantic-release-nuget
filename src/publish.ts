@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import execa from "execa";
-import { resolve, dirname } from "path";
+import { resolve } from "path";
 import { Config, Context } from "semantic-release";
 import { UserConfig } from "./UserConfig";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: Context): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
   const registry = pluginConfig.nugetServer ?? "https://api.nuget.org/v3/index.json";
-  const project = resolve(dirname(resolve(pluginConfig.projectPath)), "bin", "Release");
+  const packagePath = resolve("out");
   const baseCliArgs: string[] = ["nuget", "push"];
 
   try {
     const cliArgs = [...baseCliArgs, "-s", registry, "-k", process.env.NUGET_TOKEN!];
 
-    cliArgs.push(`${project}/*.nupkg`);
+    cliArgs.push(`${packagePath}/*.nupkg`);
 
     context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
 
@@ -48,7 +48,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Contex
       { stdio: "inherit" },
     );
 
-    const cliArgs = [...baseCliArgs, "--source", "gitlab", `${project}/*.nupkg`];
+    const cliArgs = [...baseCliArgs, "--source", "gitlab", `${packagePath}/*.nupkg`];
 
     context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
 

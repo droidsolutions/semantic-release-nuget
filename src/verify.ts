@@ -20,14 +20,24 @@ export const verify = async (pluginConfig: Config & UserConfig, _: Context): Pro
     }
   }
 
-  const project = resolve(pluginConfig.projectPath ?? "");
-  try {
-    const stats = await promises.stat(project);
-    if (!stats.isFile()) {
-      throw new Error(`The given project path ${project} is not a file.`);
+  const projects: string[] = Array.isArray(pluginConfig.projectPath)
+    ? pluginConfig.projectPath
+    : [pluginConfig.projectPath];
+
+  if (projects.length < 1) {
+    errors.push(new Error("No project files given"));
+  }
+
+  for (const project of projects) {
+    const projectPath = resolve(project ?? "");
+    try {
+      const stats = await promises.stat(projectPath);
+      if (!stats.isFile()) {
+        throw new Error(`The given project path ${projectPath} is not a file.`);
+      }
+    } catch (err) {
+      errors.push(new Error(`The given project path ${projectPath} could not be found.`));
     }
-  } catch (err) {
-    errors.push(new Error(`The given project path ${project} could not be found.`));
   }
 
   const dotnet = pluginConfig.dotnet || "dotnet";
