@@ -90,7 +90,10 @@ describe("verify", () => {
 
     let actualErr: AggregateError | undefined;
     try {
-      await verify({ projectPath: "test/fixture/some-missing.csproj" } as UserConfig, context);
+      await verify(
+        { projectPath: ["test/fixture/some-missing.csproj", "test/fixture/some.csproj"] } as UserConfig,
+        context,
+      );
     } catch (err) {
       actualErr = err as AggregateError;
     }

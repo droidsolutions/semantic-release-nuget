@@ -1,7 +1,7 @@
 /** The external configuration the user can made via Semantic Release. */
 export interface UserConfig {
   /** The relative path to the project to pack. */
-  projectPath: string;
+  projectPath: string | string[];
   /** If true Debug symbols will be included in the package. */
   includeSymbols?: boolean;
   /** If true source coe will be included in the package. */
