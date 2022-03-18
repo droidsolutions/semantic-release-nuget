@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.0.3...v1.1.0) (2022-03-18)
+
+
+### Features
+
+* allow to build multiple NuGet packages in one Repo ([39c5fa3](https://github.com/droidsolutions/semantic-release-nuget/commit/39c5fa39021b6d4c3ecfdf1a7e636c605a20f7a8))
+
 # [1.1.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.0.3...v1.1.0-beta.1) (2022-03-15)
 
 
