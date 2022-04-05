@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.1.0...v1.1.1) (2022-04-05)
+
+
+### Bug Fixes
+
+* prepare failed when projectPath was string ([f3297b7](https://github.com/droidsolutions/semantic-release-nuget/commit/f3297b74e694e2fe89f0875bbeb0d409fc2fb5a8))
+
 # [1.1.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.0.3...v1.1.0) (2022-03-18)
 
 
