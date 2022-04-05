@@ -1,12 +1,18 @@
-import execa from "execa";
+import execa, { ExecaReturnBase } from "execa";
 import { resolve } from "path";
 import { Config, Context } from "semantic-release";
 import { UserConfig } from "./UserConfig";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const SRError = require("@semantic-release/error");
 
 export const prepare = async (pluginConfig: Config & UserConfig, context: Context): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
 
   try {
+    pluginConfig.projectPath = Array.isArray(pluginConfig.projectPath)
+      ? pluginConfig.projectPath
+      : [pluginConfig.projectPath];
+
     for (const projectPath of pluginConfig.projectPath as string[]) {
       const project = resolve(projectPath);
 
@@ -29,6 +35,10 @@ export const prepare = async (pluginConfig: Config & UserConfig, context: Contex
     }
   } catch (err) {
     context.logger.error(`${dotnet} pack failed: ${(err as Error).message}`);
-    throw err;
+    throw new SRError(
+      `${dotnet} pack failed`,
+      (err as ExecaReturnBase<void>).exitCode,
+      (err as ExecaReturnBase<void>).command,
+    );
   }
 };

@@ -1,17 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import execa from "execa";
+import execa, { ExecaReturnBase } from "execa";
 import { resolve } from "path";
 import { Config, Context } from "semantic-release";
 import { UserConfig } from "./UserConfig";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const SemanticReleaseError = require("@semantic-release/error");
 
 export const publish = async (pluginConfig: Config & UserConfig, context: Context): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
   const registry = pluginConfig.nugetServer ?? "https://api.nuget.org/v3/index.json";
   const packagePath = resolve("out");
   const baseCliArgs: string[] = ["nuget", "push"];
+  const token: string = process.env.NUGET_TOKEN!;
 
   try {
-    const cliArgs = [...baseCliArgs, "-s", registry, "-k", process.env.NUGET_TOKEN!];
+    const cliArgs = [...baseCliArgs, "-s", registry, "-k", token];
 
     cliArgs.push(`${packagePath}/*.nupkg`);
 
@@ -20,7 +23,18 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Contex
     await execa(dotnet, cliArgs, { stdio: "inherit" });
   } catch (error) {
     context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
-    throw error;
+
+    if (typeof error === "object" && (error as ExecaReturnBase<void>).exitCode) {
+      const err = error as ExecaReturnBase<void>;
+      let description = err.command;
+
+      // hide token from SR output
+      if (err.command && err.command.includes(token)) {
+        description = description.replace(token, "[redacted]");
+      }
+
+      throw new SemanticReleaseError(`publish to registry ${registry} failed`, err.exitCode, description);
+    }
   }
 
   if (pluginConfig.publishToGitLab !== true) {
@@ -55,6 +69,10 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Contex
     await execa(dotnet, cliArgs, { stdio: "inherit" });
   } catch (error) {
     context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
-    throw error;
+    throw new SemanticReleaseError(
+      "publish to GitLab failed",
+      (error as ExecaReturnBase<void>).exitCode,
+      (error as ExecaReturnBase<void>).command,
+    );
   }
 };

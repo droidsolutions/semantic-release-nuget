@@ -20,15 +20,15 @@ export const verify = async (pluginConfig: Config & UserConfig, _: Context): Pro
     }
   }
 
-  const projects: string[] = Array.isArray(pluginConfig.projectPath)
+  pluginConfig.projectPath = Array.isArray(pluginConfig.projectPath)
     ? pluginConfig.projectPath
     : [pluginConfig.projectPath];
 
-  if (projects.length < 1) {
+  if (pluginConfig.projectPath.length < 1) {
     errors.push(new Error("No project files given"));
   }
 
-  for (const project of projects) {
+  for (const project of pluginConfig.projectPath) {
     const projectPath = resolve(project ?? "");
     try {
       const stats = await promises.stat(projectPath);

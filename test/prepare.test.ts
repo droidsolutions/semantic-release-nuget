@@ -94,7 +94,7 @@ describe("prepare", () => {
     });
 
     await expect(prepare({ projectPath: "b", includeSymbols: true }, context)).rejects.toThrowError(
-      "Something went wrong.",
+      "dotnet pack failed",
     );
   });
 
@@ -102,12 +102,20 @@ describe("prepare", () => {
     const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
     execaMock.mockReturnValue({ exitCode: 0 } as ExecaReturnBase<string>);
 
-    await prepare({ projectPath: "b", usePackageVersion: true }, context);
+    await prepare({ projectPath: "src/SomeProject/SomeProject.csproj", usePackageVersion: true }, context);
 
     expect(execaMock).toHaveBeenCalledTimes(1);
     expect(execaMock.mock.calls[0]).toEqual([
       "dotnet",
-      expect.arrayContaining(["pack", resolve("b"), "-c", "Release", "-o", "out", "-p:PackageVersion=1.0.0"]),
+      expect.arrayContaining([
+        "pack",
+        resolve("src/SomeProject/SomeProject.csproj"),
+        "-c",
+        "Release",
+        "-o",
+        "out",
+        "-p:PackageVersion=1.0.0",
+      ]),
       { stdio: "inherit" },
     ]);
   });

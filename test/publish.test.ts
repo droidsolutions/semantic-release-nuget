@@ -99,4 +99,28 @@ describe("publish", () => {
       { stdio: "inherit" },
     ]);
   });
+
+  it("should report error when pushing fails and mask nuget token", async () => {
+    execaMock.mockImplementationOnce(() => {
+      const result: Partial<ExecaReturnBase<void>> = {
+        command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
+        exitCode: 1,
+      };
+      throw result;
+    });
+
+    let thrown: any | undefined = undefined;
+    try {
+      await publish({ projectPath: ["a/path/to/project"] }, context);
+    } catch (err) {
+      thrown = err as Error;
+    }
+
+    expect(thrown).not.toBeUndefined();
+    expect(thrown.message).toBe("publish to registry https://api.nuget.org/v3/index.json failed");
+    expect(thrown.code).toBe(1);
+    expect(thrown.details).toBe("dotnet nuget push -s https://api.nuget.org/v3/index.json -k [redacted] out/*.nupkg");
+
+    expect(execaMock).toHaveBeenCalledTimes(1);
+  });
 });
