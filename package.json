@@ -51,7 +51,7 @@
     "eslint-plugin-jest": "26.1.5",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-prettier": "4.0.0",
-    "husky": "7.0.4",
+    "husky": "8.0.0",
     "jest": "28.0.3",
     "jest-circus": "28.0.3",
     "lint-staged": "12.4.1",
