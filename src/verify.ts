@@ -3,8 +3,10 @@ import { promises } from "fs";
 import { resolve } from "path";
 import { Config, Context } from "semantic-release";
 import { UserConfig } from "./UserConfig";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const SRError = require("@semantic-release/error");
 
-export const verify = async (pluginConfig: Config & UserConfig, _: Context): Promise<void> => {
+export const verify = async (pluginConfig: Config & UserConfig, _context: Context): Promise<void> => {
   const errors: Error[] = [];
   for (const envVar of ["NUGET_TOKEN"]) {
     if (!process.env[envVar]) {
@@ -49,6 +51,8 @@ export const verify = async (pluginConfig: Config & UserConfig, _: Context): Pro
   }
 
   if (errors.length > 0) {
-    throw new AggregateError(errors);
+    const message = errors.map((err) => err.message).join("\n");
+    // context.logger.error(message);
+    throw new SRError("Verify failed", "VERIFY_FAILED", message);
   }
 };
