@@ -1,3 +1,10 @@
+## [1.1.2-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.1.1...v1.1.2-beta.1) (2022-07-12)
+
+
+### Bug Fixes
+
+* **verify:** use SemanticReleaseError in verify ([a749358](https://github.com/droidsolutions/semantic-release-nuget/commit/a7493581492a904bf80e14e422ddf1642efea6fd))
+
 ## [1.1.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.1.0...v1.1.1) (2022-04-05)
 
 
