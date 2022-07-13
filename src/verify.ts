@@ -20,6 +20,12 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Contex
         errors.push(new Error(`GitLab environment variable ${envVar} is not set.`));
       }
     }
+  } else if (pluginConfig.skipPublishToNuget) {
+    errors.push(
+      new Error(
+        "skipPublishToNuget is set to true, but publishToGitLab is not set to true so the package will not be published anywhere.",
+      ),
+    );
   }
 
   pluginConfig.projectPath = Array.isArray(pluginConfig.projectPath)

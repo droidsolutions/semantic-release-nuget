@@ -60,19 +60,22 @@ The NuGet server authentication is **required** and can be set via [environment 
 
 ### Options
 
-| Options             | Description                                                                                      | Default     |
-| ------------------- | ------------------------------------------------------------------------------------------------ | ----------- |
-| `nugetServer`       | The URL of the NuGet server to push the package to.                                              | `nuget.org` |
-| `projectPath`       | The relative path to the project file to pack. Can also be an array including multiple projects. |             |
-| `includeSymbols`    | If true Debug symbols will be included in the package.                                           | `false`     |
-| `includeSource`     | If true source code will be included in the package.                                             | `false`     |
-| `dotnet`            | The path to the dotnet executable if not in PATH.                                                | `dotnet`    |
-| `publishToGitLab`   | If true, package will also be published to the GitLab registry.                                  | `false`     |
-| `usePackageVersion` | If true, version is directly set via dotnet pack argument.                                       | `false`     |
+| Options              | Description                                                                                                                                                                      | Default     |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `nugetServer`        | The URL of the NuGet server to push the package to.                                                                                                                              | `nuget.org` |
+| `projectPath`        | The relative path to the project file to pack. Can also be an array including multiple projects.                                                                                 |             |
+| `includeSymbols`     | If true Debug symbols will be included in the package.                                                                                                                           | `false`     |
+| `includeSource`      | If true source code will be included in the package.                                                                                                                             | `false`     |
+| `dotnet`             | The path to the dotnet executable if not in PATH.                                                                                                                                | `dotnet`    |
+| `publishToGitLab`    | If true, package will also be published to the GitLab registry.                                                                                                                  | `false`     |
+| `usePackageVersion`  | If true, version is directly set via dotnet pack argument.                                                                                                                       | `false`     |
+| `skipPublishToNuget` | If true, the NuGet package will not be published to the `nugetServer`. You can use this together with `publishToGitLab` to **only** publish your package to the GitLab registry. | `false`     |
 
 **Note**: If `usePackageVersion` is set the version from Semantic Release is given directly to the `dotnet pack` command via the `-p:PackageVersion=<version>` argument. In this case any existing version in project files are ignored.
 
 **Note**: If `publishToGitLab` is set the environment variables for `CI_SERVER_URL`, `CI_PROJECT_ID` and `CI_JOB_TOKEN` must be set. If you are running in GitLab CI this is automatically set by GitLab for you.
+
+**Note**: If `skipPublishToNuget` is set the package will not be published to the nuget server even if you specified an alternative via `nugetServer`. This only makes sense in combination with `publishToGitLab`.
 
 **Note**: When you add the [NPM plugin](https://raw.githubusercontent.com/semantic-release/npm) to update your `package.json` you should set `npmPublish` to `false` to prevent Semantic Release from trying to publish an NPM package.
 
@@ -130,7 +133,7 @@ No configure Semantic Release and use the update file plugin to update values in
     "@semantic-release/gitlab"
   ],
   "npmPublish": false, // prevent creating NPM package
-  "nugetServer": "https://nuget.droidnet.de/v3/index.json", // custom (private) NuGet server
+  "nugetServer": "https://nuget.mycomapny.com/v3/index.json", // custom (private) NuGet server
   "projectPath": "src/DroidSolutions.SemanticVersion/DroidSolutions.SemanticVersion.csproj", // path to the project file
   "includeSymbols": true,
   "publishToGitLab": true, // also publish the package to your GitLab server

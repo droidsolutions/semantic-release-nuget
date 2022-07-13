@@ -13,27 +13,32 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Contex
   const baseCliArgs: string[] = ["nuget", "push"];
   const token: string = process.env.NUGET_TOKEN!;
 
-  try {
-    const cliArgs = [...baseCliArgs, "-s", registry, "-k", token];
+  if (pluginConfig.skipPublishToNuget) {
+    context.logger.log("Skipping publish to NuGet server because skipPublishToNuget is set to true.");
+  } else {
+    try {
+      const cliArgs = [...baseCliArgs, "-s", registry, "-k", token];
 
-    cliArgs.push(`${packagePath}/*.nupkg`);
+      cliArgs.push(`${packagePath}/*.nupkg`);
 
-    context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
+      const argStrings = cliArgs.map((value) => (value === token ? "[redacted]" : value)).join(" ");
+      context.logger.log(`running command "${dotnet} ${argStrings}" ...`);
 
-    await execa(dotnet, cliArgs, { stdio: "inherit" });
-  } catch (error) {
-    context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
+      await execa(dotnet, cliArgs, { stdio: "inherit" });
+    } catch (error) {
+      context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
 
-    if (typeof error === "object" && (error as ExecaReturnBase<void>).exitCode) {
-      const err = error as ExecaReturnBase<void>;
-      let description = err.command;
+      if (typeof error === "object" && (error as ExecaReturnBase<void>).exitCode) {
+        const err = error as ExecaReturnBase<void>;
+        let description = err.command;
 
-      // hide token from SR output
-      if (err.command && err.command.includes(token)) {
-        description = description.replace(token, "[redacted]");
+        // hide token from SR output
+        if (err.command && err.command.includes(token)) {
+          description = description.replace(token, "[redacted]");
+        }
+
+        throw new SemanticReleaseError(`publish to registry ${registry} failed`, err.exitCode, description);
       }
-
-      throw new SemanticReleaseError(`publish to registry ${registry} failed`, err.exitCode, description);
     }
   }
 
