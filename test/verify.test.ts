@@ -143,4 +143,18 @@ describe("verify", () => {
     expect(actualErr).toBeDefined();
     expect(actualErr?.details).toBe("Unable to find dotnet executable in dotnet");
   });
+
+  it("should not complain about missing NUGET_TOKEN when skipPublishToNuget is true", async () => {
+    delete process.env.NUGET_TOKEN;
+    process.env.CI_SERVER_URL = "gitlab.com";
+    process.env.CI_PROJECT_ID = "132";
+    process.env.CI_JOB_TOKEN = "a3lhjli";
+
+    const promise = verify(
+      { projectPath: "test/fixture/some.csproj", skipPublishToNuget: true, publishToGitLab: true } as UserConfig,
+      context,
+    );
+
+    await expect(promise).resolves.toBeUndefined();
+  });
 });

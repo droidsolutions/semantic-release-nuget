@@ -8,10 +8,8 @@ const SRError = require("@semantic-release/error");
 
 export const verify = async (pluginConfig: Config & UserConfig, _context: Context): Promise<void> => {
   const errors: Error[] = [];
-  for (const envVar of ["NUGET_TOKEN"]) {
-    if (!process.env[envVar]) {
-      errors.push(new Error(`Environment variable ${envVar} is not set.`));
-    }
+  if (!pluginConfig.skipPublishToNuget && !process.env["NUGET_TOKEN"]) {
+    errors.push(new Error("Environment variable NUGET_TOKEN is not set."));
   }
 
   if (pluginConfig.publishToGitLab) {
