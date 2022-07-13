@@ -130,7 +130,7 @@ No configure Semantic Release and use the update file plugin to update values in
     "@semantic-release/gitlab"
   ],
   "npmPublish": false, // prevent creating NPM package
-  "nugetServer": "https://nuget.droidnet.de/v3/index.json", // custom (private) NuGet server
+  "nugetServer": "https://nuget.mycomapny.com/v3/index.json", // custom (private) NuGet server
   "projectPath": "src/DroidSolutions.SemanticVersion/DroidSolutions.SemanticVersion.csproj", // path to the project file
   "includeSymbols": true,
   "publishToGitLab": true, // also publish the package to your GitLab server
