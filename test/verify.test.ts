@@ -92,18 +92,18 @@ describe("verify", () => {
   it("should report an error when publishToGitlab is false and skipPublishToNuget is true", async () => {
     process.env.NUGET_TOKEN = "104E2";
 
-    let actualErr: AggregateError | undefined;
+    let actualErr: SemanticReleaeError | undefined;
     try {
       await verify(
         { publishToGitLab: false, skipPublishToNuget: true, projectPath: "test/fixture/some.csproj" } as UserConfig,
         context,
       );
     } catch (err) {
-      actualErr = err as AggregateError;
+      actualErr = err as SemanticReleaeError;
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.errors[0].message).toBe(
+    expect(actualErr?.details).toBe(
       "skipPublishToNuget is set to true, but publishToGitLab is not set to true so the package will not be published anywhere.",
     );
   });
