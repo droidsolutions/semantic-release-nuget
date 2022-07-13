@@ -18,7 +18,8 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Contex
 
     cliArgs.push(`${packagePath}/*.nupkg`);
 
-    context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
+    const argStrings = cliArgs.map((value) => (value === token ? "[redacted]" : value)).join(" ");
+    context.logger.log(`running command "${dotnet} ${argStrings}" ...`);
 
     await execa(dotnet, cliArgs, { stdio: "inherit" });
   } catch (error) {

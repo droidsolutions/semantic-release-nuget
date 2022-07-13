@@ -123,4 +123,21 @@ describe("publish", () => {
 
     expect(execaMock).toHaveBeenCalledTimes(1);
   });
+
+  it("should react nuget token from command output", async () => {
+    execaMock.mockImplementationOnce(() => {
+      return {
+        command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
+        exitCode: 0,
+      } as ExecaReturnBase<string>;
+    });
+
+    (context.logger.log as jest.Mock<void, unknown[]>).mockReset();
+
+    await publish({ projectPath: ["a/path/to/project"] }, context);
+    expect(context.logger.log).toHaveBeenCalledWith(expect.stringContaining("-k [redacted]"));
+
+    // check that token is still in args passed to execa
+    expect(execaMock).toHaveBeenCalledWith("dotnet", expect.arrayContaining(["104E4"]), { stdio: "inherit" });
+  });
 });
