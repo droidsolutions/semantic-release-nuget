@@ -124,6 +124,58 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
   });
 
+  it("should not publish to nugetServer when skipPublishToNuget is true", async () => {
+    await publish(
+      {
+        projectPath: "src/MyProject/MyProject.csproj",
+        skipPublishToNuget: true,
+        publishToGitLab: false,
+      },
+      context,
+    );
+
+    expect(execaMock).not.toHaveBeenCalled();
+  });
+
+  it("should publish to nugetServer when skipPublishToNuget is false", async () => {
+    execaMock.mockImplementationOnce(() => {
+      return {
+        command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
+        exitCode: 0,
+      } as ExecaReturnBase<string>;
+    });
+
+    await publish(
+      {
+        projectPath: "src/MyProject/MyProject.csproj",
+        skipPublishToNuget: false,
+        publishToGitLab: false,
+      },
+      context,
+    );
+
+    expect(execaMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("should publish to nugetServer when skipPublishToNuget is not set", async () => {
+    execaMock.mockImplementationOnce(() => {
+      return {
+        command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
+        exitCode: 0,
+      } as ExecaReturnBase<string>;
+    });
+
+    await publish(
+      {
+        projectPath: "src/MyProject/MyProject.csproj",
+        publishToGitLab: false,
+      },
+      context,
+    );
+
+    expect(execaMock).toHaveBeenCalledTimes(1);
+  });
+
   it("should react nuget token from command output", async () => {
     execaMock.mockImplementationOnce(() => {
       return {

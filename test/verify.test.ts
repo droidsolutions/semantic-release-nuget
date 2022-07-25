@@ -85,6 +85,25 @@ describe("verify", () => {
     expect(actualErr?.errors[0].message).toBe("GitLab environment variable CI_JOB_TOKEN is not set.");
   });
 
+  it("should report an error when publishToGitlab is false and skipPublishToNuget is true", async () => {
+    process.env.NUGET_TOKEN = "104E2";
+
+    let actualErr: AggregateError | undefined;
+    try {
+      await verify(
+        { publishToGitLab: false, skipPublishToNuget: true, projectPath: "test/fixture/some.csproj" } as UserConfig,
+        context,
+      );
+    } catch (err) {
+      actualErr = err as AggregateError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.errors[0].message).toBe(
+      "skipPublishToNuget is set to true, but publishToGitLab is not set to true so the package will not be published anywhere.",
+    );
+  });
+
   it("should report an error if path to non existing project file is given", async () => {
     process.env.NUGET_TOKEN = "104E2";
 
