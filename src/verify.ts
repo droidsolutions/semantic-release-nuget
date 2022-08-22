@@ -3,13 +3,13 @@ import { promises } from "fs";
 import { resolve } from "path";
 import { Config, Context } from "semantic-release";
 import { UserConfig } from "./UserConfig";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const SRError = require("@semantic-release/error");
 
-export const verify = async (pluginConfig: Config & UserConfig, _: Context): Promise<void> => {
+export const verify = async (pluginConfig: Config & UserConfig, _context: Context): Promise<void> => {
   const errors: Error[] = [];
-  for (const envVar of ["NUGET_TOKEN"]) {
-    if (!process.env[envVar]) {
-      errors.push(new Error(`Environment variable ${envVar} is not set.`));
-    }
+  if (!pluginConfig.skipPublishToNuget && !process.env["NUGET_TOKEN"]) {
+    errors.push(new Error("Environment variable NUGET_TOKEN is not set."));
   }
 
   if (pluginConfig.publishToGitLab) {
@@ -18,6 +18,12 @@ export const verify = async (pluginConfig: Config & UserConfig, _: Context): Pro
         errors.push(new Error(`GitLab environment variable ${envVar} is not set.`));
       }
     }
+  } else if (pluginConfig.skipPublishToNuget) {
+    errors.push(
+      new Error(
+        "skipPublishToNuget is set to true, but publishToGitLab is not set to true so the package will not be published anywhere.",
+      ),
+    );
   }
 
   pluginConfig.projectPath = Array.isArray(pluginConfig.projectPath)
@@ -49,6 +55,8 @@ export const verify = async (pluginConfig: Config & UserConfig, _: Context): Pro
   }
 
   if (errors.length > 0) {
-    throw new AggregateError(errors);
+    const message = errors.map((err) => err.message).join("\n");
+    // context.logger.error(message);
+    throw new SRError("Verify failed", "VERIFY_FAILED", message);
   }
 };
