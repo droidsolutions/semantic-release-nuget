@@ -1,3 +1,16 @@
+# [1.2.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.1.2...v1.2.0) (2022-08-22)
+
+
+### Bug Fixes
+
+* **deps:** update vulnerable deps via npm audit fix ([a9b79b7](https://github.com/droidsolutions/semantic-release-nuget/commit/a9b79b707a8452b9b6ebef55893827aa0d6270f4))
+* **verify:** use SemanticReleaseError in verify ([a749358](https://github.com/droidsolutions/semantic-release-nuget/commit/a7493581492a904bf80e14e422ddf1642efea6fd))
+
+
+### Features
+
+* allow to skip publish to official NuGet ([53eb0e7](https://github.com/droidsolutions/semantic-release-nuget/commit/53eb0e7ad6cd22afe65e401f976c07ab2c438e90))
+
 # [1.2.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.1.2...v1.2.0-beta.1) (2022-07-13)
 
 
