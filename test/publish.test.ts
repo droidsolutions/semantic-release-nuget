@@ -11,8 +11,9 @@ describe("publish", () => {
   beforeAll(() => {
     const logMock = jest.fn<void, unknown[]>();
     context = {
+      branch: { name: "main" },
       env: {},
-      logger: { log: logMock, error: logMock },
+      logger: { log: logMock, error: logMock } as any,
       nextRelease: { gitTag: "v1.0.0", notes: "", type: "major", gitHead: "", version: "1.0.0" },
     };
     execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
