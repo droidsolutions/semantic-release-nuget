@@ -94,9 +94,7 @@ describe("prepare", () => {
       throw new Error("Something went wrong.");
     });
 
-    await expect(prepare({ projectPath: "b", includeSymbols: true }, context)).rejects.toThrowError(
-      "dotnet pack failed",
-    );
+    await expect(prepare({ projectPath: "b", includeSymbols: true }, context)).rejects.toThrow("dotnet pack failed");
   });
 
   it("should add PackageVersion argument when usePackageVersion is set to true", async () => {
