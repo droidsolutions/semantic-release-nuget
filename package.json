@@ -42,7 +42,7 @@
     "@semantic-release/git": "10.0.1",
     "@swc-node/jest": "1.5.7",
     "@types/jest": "29.4.0",
-    "@types/node": "18.13.0",
+    "@types/node": "18.14.0",
     "@types/semantic-release": "20.0.1",
     "@typescript-eslint/eslint-plugin": "5.51.0",
     "@typescript-eslint/parser": "5.51.0",
