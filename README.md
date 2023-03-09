@@ -108,7 +108,7 @@ The following is an example how to use this plugin to build semantic versioned N
 
 No configure Semantic Release and use the update file plugin to update values in the file. Apart from the Version you can also update the commit hash and others. Refer to the [Semantic Release documentation](https://semantic-release.gitbook.io/semantic-release/developer-guide/js-api#result) for a list of values you can use.
 
-```json
+```jsonc
 {
   // order of plugins is important, because it is the execution order
   "plugins": [
