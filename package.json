@@ -33,7 +33,7 @@
     "node": ">=15.14.0"
   },
   "dependencies": {
-    "execa": "<6.0.0"
+    "execa": "<8.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "17.6.0",
