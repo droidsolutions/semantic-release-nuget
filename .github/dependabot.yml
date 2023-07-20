@@ -1,3 +1,4 @@
+---
 version: 2
 updates:
   - directory: /
@@ -10,6 +11,13 @@ updates:
     assignees:
       - "kampfmoehre"
   - directory: /
+    groups:
+      commitlint:
+        patterns:
+          - "@commitlint/*"
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint/*"
     open-pull-requests-limit: 10
     package-ecosystem: npm
     rebase-strategy: auto
