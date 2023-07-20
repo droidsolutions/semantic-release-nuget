@@ -13,6 +13,7 @@ describe("publish", () => {
     context = {
       branch: { name: "main" },
       env: {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
       nextRelease: { gitTag: "v1.0.0", notes: "", type: "major", gitHead: "", version: "1.0.0" },
     };
@@ -110,6 +111,7 @@ describe("publish", () => {
       throw result;
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let thrown: any | undefined = undefined;
     try {
       await publish({ projectPath: ["a/path/to/project"] }, context);
