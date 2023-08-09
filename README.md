@@ -51,12 +51,12 @@ The NuGet server authentication is **required** and can be set via [environment 
 
 ### Environment Variables
 
-| Variable        | Description                                                                                                                                                                |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NUGET_TOKEN`   | NuGet token of the NuGet server you want to publish tocreated via [npm token create](https://docs.npmjs.com/getting-started/working_with_tokens#how-to-create-new-tokens). |
-| `CI_SERVER_URL` | If you want to publish to your GitLab server, this needs to be set. When running in GitLab CI this is already set by GitLab.                                               |
-| `CI_PROJECT_ID` | If you want to publish to your GitLab server, this needs to be set. When running in GitLab CI this is already set by GitLab.                                               |
-| `CI_JOB_TOKEN`  | If you want to publish to your GitLab server, this needs to be set. When running in GitLab CI this is already set by GitLab.                                               |
+| Variable        | Description                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `NUGET_TOKEN`   | NuGet token of the NuGet server you want to publish to, created on the [NuGet API keys page](https://www.nuget.org/account/apikeys). |
+| `CI_SERVER_URL` | If you want to publish to your GitLab server, this needs to be set. When running in GitLab CI this is already set by GitLab.         |
+| `CI_PROJECT_ID` | If you want to publish to your GitLab server, this needs to be set. When running in GitLab CI this is already set by GitLab.         |
+| `CI_JOB_TOKEN`  | If you want to publish to your GitLab server, this needs to be set. When running in GitLab CI this is already set by GitLab.         |
 
 ### Options
 
