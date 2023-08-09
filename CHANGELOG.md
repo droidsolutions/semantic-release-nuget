@@ -1,3 +1,10 @@
+# [1.3.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.2.0...v1.3.0-beta.1) (2023-08-09)
+
+
+### Features
+
+* add gitlabRegistryProjectId config ([e2c29aa](https://github.com/droidsolutions/semantic-release-nuget/commit/e2c29aa4e9ebf486ece0bf079ff80ca4112a8696))
+
 # [1.2.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.1.2...v1.2.0) (2022-08-22)
 
 
