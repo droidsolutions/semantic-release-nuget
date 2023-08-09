@@ -13,10 +13,14 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Contex
   }
 
   if (pluginConfig.publishToGitLab) {
-    for (const envVar of ["CI_SERVER_URL", "CI_PROJECT_ID", "CI_JOB_TOKEN"]) {
+    for (const envVar of ["CI_SERVER_URL", "CI_JOB_TOKEN"]) {
       if (!process.env[envVar]) {
         errors.push(new Error(`GitLab environment variable ${envVar} is not set.`));
       }
+    }
+
+    if (!pluginConfig.gitlabRegistryProjectId && !process.env["CI_PROJECT_ID"]) {
+      errors.push(new Error("Either CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set."));
     }
   } else if (pluginConfig.skipPublishToNuget) {
     errors.push(

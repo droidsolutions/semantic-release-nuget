@@ -47,7 +47,15 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Contex
   }
 
   try {
-    const url = `${process.env.CI_SERVER_URL!}/api/v4/projects/${process.env.CI_PROJECT_ID!}/packages/nuget/index.json`;
+    let projectId = process.env.CI_PROJECT_ID as string;
+    let gitlabToken = process.env.CI_JOB_TOKEN as string;
+
+    if (pluginConfig.gitlabRegistryProjectId) {
+      projectId = pluginConfig.gitlabRegistryProjectId;
+      gitlabToken = token;
+    }
+
+    const url = `${process.env.CI_SERVER_URL!}/api/v4/projects/${projectId}/packages/nuget/index.json`;
     context.logger.log(`Adding GitLab as NuGet source ${url}`);
     await execa(
       dotnet,
@@ -61,7 +69,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Contex
         "--username",
         "gitlab-ci-token",
         "--password",
-        process.env.CI_JOB_TOKEN!,
+        gitlabToken,
         "--store-password-in-clear-text",
       ],
       { stdio: "inherit" },

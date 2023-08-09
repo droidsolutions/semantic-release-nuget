@@ -71,7 +71,9 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("GitLab environment variable CI_PROJECT_ID is not set.");
+    expect(actualErr?.details).toBe(
+      "Either CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set.",
+    );
   });
 
   it("should report an error when publishToGitLab is true and no CI_JOB_TOKEN is set", async () => {
