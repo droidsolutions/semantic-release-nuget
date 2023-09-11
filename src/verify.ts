@@ -22,6 +22,10 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
     if (!pluginConfig.gitlabRegistryProjectId && !process.env["CI_PROJECT_ID"]) {
       errors.push(new Error("Either CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set."));
     }
+
+    if (pluginConfig.gitlabRegistryProjectId && !pluginConfig.gitlabUser) {
+      errors.push(new Error("When a separate GitLab project ID is set, gitlabUser must also be set."));
+    }
   } else if (pluginConfig.skipPublishToNuget) {
     errors.push(
       new Error(

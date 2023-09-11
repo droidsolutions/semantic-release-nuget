@@ -75,6 +75,25 @@ describe("verify", () => {
     );
   });
 
+  it("should report an error when separate GitLab rpoject id is set but gitlabUser is missing", async () => {
+    delete process.env.CI_PROJECT_ID;
+    process.env.NUGET_TOKEN = "104E2";
+    process.env.CI_SERVER_URL = "gitlab.com";
+
+    let actualErr: SemanticReleaeError | undefined;
+    try {
+      await verify(
+        { publishToGitLab: true, projectPath: "test/fixture/some.csproj", gitlabRegistryProjectId: 42 } as UserConfig,
+        context,
+      );
+    } catch (err) {
+      actualErr = err as SemanticReleaeError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toBe("When a separate GitLab project ID is set, gitlabUser must also be set.");
+  });
+
   it("should report an error when publishToGitLab is true and no CI_JOB_TOKEN is set", async () => {
     delete process.env.CI_JOB_TOKEN;
     process.env.NUGET_TOKEN = "104E2";

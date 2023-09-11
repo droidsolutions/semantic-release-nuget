@@ -47,12 +47,14 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
   }
 
   try {
-    let projectId = process.env.CI_PROJECT_ID as string;
+    let projectId = parseInt(process.env.CI_PROJECT_ID as string, 10);
     let gitlabToken = process.env.CI_JOB_TOKEN as string;
+    let gitlabUser = "gitlab-ci-token";
 
     if (pluginConfig.gitlabRegistryProjectId) {
       projectId = pluginConfig.gitlabRegistryProjectId;
       gitlabToken = token;
+      gitlabUser = pluginConfig.gitlabUser!;
     }
 
     const url = `${process.env.CI_SERVER_URL!}/api/v4/projects/${projectId}/packages/nuget/index.json`;
@@ -67,7 +69,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
         "--name",
         "gitlab",
         "--username",
-        "gitlab-ci-token",
+        gitlabUser,
         "--password",
         gitlabToken,
         "--store-password-in-clear-text",

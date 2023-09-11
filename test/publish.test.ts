@@ -218,9 +218,10 @@ describe("publish", () => {
 
     await publish(
       {
+        gitlabRegistryProjectId: 12345,
+        gitlabUser: "deploy-user",
         projectPath: "src/MyProject/MyProject.csproj",
         publishToGitLab: true,
-        gitlabRegistryProjectId: "12345",
         skipPublishToNuget: true,
       },
       context,
@@ -237,7 +238,7 @@ describe("publish", () => {
         "--name",
         "gitlab",
         "--username",
-        "gitlab-ci-token",
+        "deploy-user",
         "--password",
         process.env.NUGET_TOKEN, // use NuGet token in this case
         "--store-password-in-clear-text",
