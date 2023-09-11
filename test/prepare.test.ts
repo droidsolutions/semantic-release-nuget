@@ -1,12 +1,12 @@
 import execa, { ExecaReturnBase } from "execa";
-import { Context } from "semantic-release";
+import { PrepareContext } from "semantic-release";
 import { prepare } from "../src/prepare";
 import { resolve } from "path";
 
 jest.mock("execa");
 
 describe("prepare", () => {
-  let context: Context;
+  let context: PrepareContext;
 
   beforeAll(() => {
     const logMock = jest.fn<void, unknown[]>();
@@ -16,7 +16,7 @@ describe("prepare", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
       nextRelease: { gitTag: "v1.0.0", notes: "", type: "major", gitHead: "", version: "1.0.0" },
-    };
+    } as PrepareContext;
   });
 
   afterEach(() => {

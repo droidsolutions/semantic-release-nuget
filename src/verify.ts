@@ -1,12 +1,12 @@
 import execa from "execa";
 import { promises } from "fs";
 import { resolve } from "path";
-import { Config, Context } from "semantic-release";
+import { Config, VerifyConditionsContext } from "semantic-release";
 import { UserConfig } from "./UserConfig";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const SRError = require("@semantic-release/error");
 
-export const verify = async (pluginConfig: Config & UserConfig, _context: Context): Promise<void> => {
+export const verify = async (pluginConfig: Config & UserConfig, _context: VerifyConditionsContext): Promise<void> => {
   const errors: Error[] = [];
   if (!pluginConfig.skipPublishToNuget && !process.env["NUGET_TOKEN"]) {
     errors.push(new Error("Environment variable NUGET_TOKEN is not set."));

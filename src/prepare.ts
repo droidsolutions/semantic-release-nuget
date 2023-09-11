@@ -1,11 +1,11 @@
 import execa, { ExecaReturnBase } from "execa";
 import { resolve } from "path";
-import { Config, Context } from "semantic-release";
+import { Config, PrepareContext } from "semantic-release";
 import { UserConfig } from "./UserConfig";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const SRError = require("@semantic-release/error");
 
-export const prepare = async (pluginConfig: Config & UserConfig, context: Context): Promise<void> => {
+export const prepare = async (pluginConfig: Config & UserConfig, context: PrepareContext): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
 
   try {

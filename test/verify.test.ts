@@ -1,5 +1,5 @@
 import execa, { ExecaReturnBase } from "execa";
-import { Context } from "semantic-release";
+import { VerifyConditionsContext } from "semantic-release";
 import { UserConfig } from "../src/UserConfig";
 import { verify } from "../src/verify";
 
@@ -9,7 +9,7 @@ jest.mock("execa");
 
 describe("verify", () => {
   let originalEnv: NodeJS.ProcessEnv;
-  let context: Context;
+  let context: VerifyConditionsContext;
   let execaMock: jest.Mock<ExecaReturnBase<string>, unknown[]>;
 
   beforeAll(() => {
@@ -20,8 +20,7 @@ describe("verify", () => {
       env: {},
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
-      nextRelease: { gitTag: "v1.0.0", notes: "", type: "major", gitHead: "", version: "1.0.0" },
-    };
+    } as VerifyConditionsContext;
     execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, unknown[]>;
   });
 

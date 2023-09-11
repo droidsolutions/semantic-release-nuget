@@ -1,11 +1,11 @@
 import execa, { ExecaReturnBase } from "execa";
-import { Context } from "semantic-release";
+import { PublishContext } from "semantic-release";
 import { publish } from "../src/publish";
 
 jest.mock("execa");
 
 describe("publish", () => {
-  let context: Context;
+  let context: PublishContext;
   let execaMock: jest.Mock<ExecaReturnBase<string>, never[]>;
 
   beforeAll(() => {
@@ -15,8 +15,16 @@ describe("publish", () => {
       env: {},
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
-      nextRelease: { gitTag: "v1.0.0", notes: "", type: "major", gitHead: "", version: "1.0.0" },
-    };
+      nextRelease: {
+        channel: "main",
+        gitTag: "v1.0.0",
+        name: "",
+        notes: "",
+        type: "major",
+        gitHead: "",
+        version: "1.0.0",
+      },
+    } as PublishContext;
     execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
 
     process.env.CI_REGISTRY_USER = "its-a-me-mario";
