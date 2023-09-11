@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import execa, { ExecaReturnBase } from "execa";
 import { resolve } from "path";
-import { Config, Context } from "semantic-release";
+import { Config, PublishContext } from "semantic-release";
 import { UserConfig } from "./UserConfig";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const SemanticReleaseError = require("@semantic-release/error");
 
-export const publish = async (pluginConfig: Config & UserConfig, context: Context): Promise<void> => {
+export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
   const registry = pluginConfig.nugetServer ?? "https://api.nuget.org/v3/index.json";
   const packagePath = resolve("out");
