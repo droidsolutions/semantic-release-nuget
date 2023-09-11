@@ -1,6 +1,6 @@
 {
   "name": "@droidsolutions-oss/semantic-release-nuget",
-  "version": "1.3.0-beta.1",
+  "version": "1.3.0-beta.2",
   "description": "Semantic Release plugin to create and publish NuGet packages.",
   "main": "dist/index.js",
   "files": [
