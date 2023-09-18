@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: ["16", "18"]
+        node: ["16", "18", "20"]
     steps:
       - uses: actions/checkout@v4
       - name: Use NodeJS
@@ -60,10 +60,12 @@ jobs:
       - test
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Use NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Download dist from build
