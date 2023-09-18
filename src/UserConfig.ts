@@ -19,4 +19,8 @@ export interface UserConfig {
   usePackageVersion?: boolean;
   /** If true, package will not be published to the official NuGet server. */
   skipPublishToNuget?: boolean;
+  /** Optional GitLab project id to publish NuGet package to. */
+  gitlabRegistryProjectId?: number;
+  /** Optional username to use with the token when authenticating at GitLab. */
+  gitlabUser?: string;
 }

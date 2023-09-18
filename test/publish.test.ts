@@ -30,6 +30,7 @@ describe("publish", () => {
     process.env.CI_REGISTRY_USER = "its-a-me-mario";
     process.env.CI_REGISTRY_PASSWORD = "hunter2";
     process.env.NUGET_TOKEN = "104E4";
+    process.env.CI_PROJECT_ID = "132";
   });
 
   afterEach(() => {
@@ -187,7 +188,7 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(1);
   });
 
-  it("should react nuget token from command output", async () => {
+  it("should redact nuget token from command output", async () => {
     execaMock.mockImplementationOnce(() => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -202,5 +203,47 @@ describe("publish", () => {
 
     // check that token is still in args passed to execa
     expect(execaMock).toHaveBeenCalledWith("dotnet", expect.arrayContaining(["104E4"]), { stdio: "inherit" });
+  });
+
+  it("should use gitlabRegistryProjectId over CI_PROJECT_ID if set", async () => {
+    execaMock.mockImplementationOnce(() => {
+      return {
+        command:
+          "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
+        exitCode: 0,
+      } as ExecaReturnBase<string>;
+    });
+
+    process.env.CI_SERVER_URL = "https://gitlab.example.com";
+
+    await publish(
+      {
+        gitlabRegistryProjectId: 12345,
+        gitlabUser: "deploy-user",
+        projectPath: "src/MyProject/MyProject.csproj",
+        publishToGitLab: true,
+        skipPublishToNuget: true,
+      },
+      context,
+    );
+
+    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock.mock.calls[0]).toEqual([
+      "dotnet",
+      [
+        "nuget",
+        "add",
+        "source",
+        "https://gitlab.example.com/api/v4/projects/12345/packages/nuget/index.json",
+        "--name",
+        "gitlab",
+        "--username",
+        "deploy-user",
+        "--password",
+        process.env.NUGET_TOKEN, // use NuGet token in this case
+        "--store-password-in-clear-text",
+      ],
+      { stdio: "inherit" },
+    ]);
   });
 });

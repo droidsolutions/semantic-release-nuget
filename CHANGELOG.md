@@ -1,3 +1,17 @@
+# [1.3.0-beta.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.3.0-beta.1...v1.3.0-beta.2) (2023-09-11)
+
+
+### Features
+
+* **GitLab:** allow to provide a username when publishing to separate GitLab project ([49de3d1](https://github.com/droidsolutions/semantic-release-nuget/commit/49de3d18df6eb5d0f792681e843cc5d939152ae2)), closes [#624](https://github.com/droidsolutions/semantic-release-nuget/issues/624)
+
+# [1.3.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.2.0...v1.3.0-beta.1) (2023-08-09)
+
+
+### Features
+
+* add gitlabRegistryProjectId config ([e2c29aa](https://github.com/droidsolutions/semantic-release-nuget/commit/e2c29aa4e9ebf486ece0bf079ff80ca4112a8696))
+
 # [1.2.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.1.2...v1.2.0) (2022-08-22)
 
 
