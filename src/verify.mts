@@ -1,10 +1,9 @@
-import execa from "execa";
+import SRError from "@semantic-release/error";
+import { execa } from "execa";
 import { promises } from "fs";
 import { resolve } from "path";
 import { Config, VerifyConditionsContext } from "semantic-release";
-import { UserConfig } from "./UserConfig";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const SRError = require("@semantic-release/error");
+import { UserConfig } from "./UserConfig.mjs";
 
 export const verify = async (pluginConfig: Config & UserConfig, _context: VerifyConditionsContext): Promise<void> => {
   const errors: Error[] = [];

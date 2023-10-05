@@ -1,27 +1,32 @@
-import execa, { ExecaReturnBase } from "execa";
-import { VerifyConditionsContext } from "semantic-release";
-import { UserConfig } from "../src/UserConfig";
-import { verify } from "../src/verify";
+import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
+import type SemanticReleaseError from "@semantic-release/error";
+import type { execa as execaType } from "execa";
+import type { VerifyConditionsContext } from "semantic-release";
+import type { UserConfig } from "../src/UserConfig.mjs";
 
-type SemanticReleaeError = { details: string };
-
-jest.mock("execa");
+jest.unstable_mockModule("execa", () => ({
+  execa: jest.fn(),
+}));
 
 describe("verify", () => {
   let originalEnv: NodeJS.ProcessEnv;
   let context: VerifyConditionsContext;
-  let execaMock: jest.Mock<ExecaReturnBase<string>, unknown[]>;
+  let execaMock: jest.Mock<typeof execaType>;
+  let verify: (pluginConfig: UserConfig, _context: VerifyConditionsContext) => Promise<void>;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     originalEnv = process.env;
-    const logMock = jest.fn<void, unknown[]>();
+    const logMock = jest.fn();
     context = {
       branch: { name: "main" },
       env: {},
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
     } as VerifyConditionsContext;
-    execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, unknown[]>;
+    const { execa } = await import("execa");
+    execaMock = execa as unknown as jest.Mock<typeof execaType>;
+    const verifyImport = await import("../src/verify.mjs");
+    verify = verifyImport.verify;
   });
 
   afterAll(() => {
@@ -29,11 +34,11 @@ describe("verify", () => {
   });
 
   it("should report an error when NUGET_TOKEN is no set", async () => {
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ projectPath: "test/fixture/some.csproj" } as UserConfig, context);
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
@@ -46,11 +51,11 @@ describe("verify", () => {
     process.env.CI_PROJECT_ID = "132";
     process.env.CI_JOB_TOKEN = "a3lhjli";
 
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" } as UserConfig, context);
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
@@ -62,11 +67,11 @@ describe("verify", () => {
     process.env.NUGET_TOKEN = "104E2";
     process.env.CI_SERVER_URL = "gitlab.com";
 
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" } as UserConfig, context);
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
@@ -80,14 +85,14 @@ describe("verify", () => {
     process.env.NUGET_TOKEN = "104E2";
     process.env.CI_SERVER_URL = "gitlab.com";
 
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify(
         { publishToGitLab: true, projectPath: "test/fixture/some.csproj", gitlabRegistryProjectId: 42 } as UserConfig,
         context,
       );
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
@@ -100,11 +105,11 @@ describe("verify", () => {
     process.env.CI_SERVER_URL = "gitlab.com";
     process.env.CI_PROJECT_ID = "132";
 
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" } as UserConfig, context);
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
@@ -114,14 +119,14 @@ describe("verify", () => {
   it("should report an error when publishToGitlab is false and skipPublishToNuget is true", async () => {
     process.env.NUGET_TOKEN = "104E2";
 
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify(
         { publishToGitLab: false, skipPublishToNuget: true, projectPath: "test/fixture/some.csproj" } as UserConfig,
         context,
       );
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
@@ -133,14 +138,14 @@ describe("verify", () => {
   it("should report an error if path to non existing project file is given", async () => {
     process.env.NUGET_TOKEN = "104E2";
 
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify(
         { projectPath: ["test/fixture/some-missing.csproj", "test/fixture/some.csproj"] } as UserConfig,
         context,
       );
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
@@ -155,15 +160,32 @@ describe("verify", () => {
       throw new Error("Some error");
     });
 
-    let actualErr: SemanticReleaeError | undefined;
+    let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ projectPath: "test/fixture/some.csproj" } as UserConfig, context);
     } catch (err) {
-      actualErr = err as SemanticReleaeError;
+      actualErr = err as SemanticReleaseError;
     }
 
     expect(actualErr).toBeDefined();
     expect(actualErr?.details).toBe("Unable to find dotnet executable in dotnet");
+  });
+
+  it("should complain when projectPath is an empty array", async () => {
+    delete process.env.NUGET_TOKEN;
+    process.env.CI_SERVER_URL = "gitlab.com";
+    process.env.CI_PROJECT_ID = "132";
+    process.env.CI_JOB_TOKEN = "a3lhjli";
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify({ projectPath: [], skipPublishToNuget: true, publishToGitLab: true } as UserConfig, context);
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toBe("No project files given");
   });
 
   it("should not complain about missing NUGET_TOKEN when skipPublishToNuget is true", async () => {

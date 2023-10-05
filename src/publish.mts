@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import execa, { ExecaReturnBase } from "execa";
+import SemanticReleaseError from "@semantic-release/error";
+import { execa } from "execa";
 import { resolve } from "path";
 import { Config, PublishContext } from "semantic-release";
-import { UserConfig } from "./UserConfig";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const SemanticReleaseError = require("@semantic-release/error");
+import { isExecaError, publishFailed } from "./Helper.mjs";
+import { UserConfig } from "./UserConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
   const dotnet = pluginConfig.dotnet || "dotnet";
@@ -28,17 +27,22 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
     } catch (error) {
       context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
 
-      if (typeof error === "object" && (error as ExecaReturnBase<void>).exitCode) {
-        const err = error as ExecaReturnBase<void>;
-        let description = err.command;
+      if (isExecaError(error)) {
+        let description = error.command;
 
         // hide token from SR output
-        if (err.command && err.command.includes(token)) {
+        if (error.command && error.command.includes(token)) {
           description = description.replace(token, "[redacted]");
         }
 
-        throw new SemanticReleaseError(`publish to registry ${registry} failed`, err.exitCode, description);
+        throw new SemanticReleaseError(
+          `publish to registry ${registry} failed with exit code ${error.exitCode}`,
+          publishFailed,
+          description,
+        );
       }
+
+      throw new SemanticReleaseError(`publish to registry ${registry} failed`, publishFailed, (error as Error).message);
     }
   }
 
@@ -84,10 +88,14 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
     await execa(dotnet, cliArgs, { stdio: "inherit" });
   } catch (error) {
     context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
-    throw new SemanticReleaseError(
-      "publish to GitLab failed",
-      (error as ExecaReturnBase<void>).exitCode,
-      (error as ExecaReturnBase<void>).command,
-    );
+    if (isExecaError(error)) {
+      throw new SemanticReleaseError(
+        `publish to GitLab failed with exit code ${error.exitCode}`,
+        publishFailed,
+        error.command,
+      );
+    }
+
+    throw new SemanticReleaseError("publish to GitLab failed", publishFailed, (error as Error).message);
   }
 };

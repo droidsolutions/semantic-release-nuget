@@ -1,15 +1,20 @@
-import execa, { ExecaReturnBase } from "execa";
-import { PrepareContext } from "semantic-release";
-import { prepare } from "../src/prepare";
+import { afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals";
+import type { ExecaChildProcess, ExecaError, execa } from "execa";
 import { resolve } from "path";
+import type { PrepareContext } from "semantic-release";
+import type { prepare as prepareType } from "../src/prepare.mjs";
 
-jest.mock("execa");
+jest.unstable_mockModule("execa", () => ({
+  execa: jest.fn(),
+}));
 
 describe("prepare", () => {
   let context: PrepareContext;
+  let prepare: typeof prepareType;
+  let execaMock: jest.Mock<typeof execa>;
 
-  beforeAll(() => {
-    const logMock = jest.fn<void, unknown[]>();
+  beforeAll(async () => {
+    const logMock = jest.fn();
     context = {
       branch: { name: "main" },
       env: {},
@@ -17,16 +22,20 @@ describe("prepare", () => {
       logger: { log: logMock, error: logMock } as any,
       nextRelease: { gitTag: "v1.0.0", notes: "", type: "major", gitHead: "", version: "1.0.0" },
     } as PrepareContext;
+
+    const execaImport = await import("execa");
+    execaMock = execaImport.execa as unknown as jest.Mock<typeof execa>;
+
+    const prepareImport = await import("../src/prepare.mjs");
+    prepare = prepareImport.prepare;
   });
 
-  afterEach(() => {
-    const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
+  afterEach(async () => {
     execaMock.mockReset();
   });
 
   it("should call pack with the correct arguments", async () => {
-    const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaReturnBase<string>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
 
     await prepare({ dotnet: "a", projectPath: "b" }, context);
 
@@ -39,8 +48,7 @@ describe("prepare", () => {
   });
 
   it("should use default dotnet command if not given", async () => {
-    const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaReturnBase<string>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
 
     await prepare({ projectPath: "b" }, context);
 
@@ -53,8 +61,7 @@ describe("prepare", () => {
   });
 
   it("should add include-source flag if set", async () => {
-    const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaReturnBase<string>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
 
     await prepare({ projectPath: "b", includeSource: true }, context);
 
@@ -67,8 +74,7 @@ describe("prepare", () => {
   });
 
   it("should add include-symbols flag if set", async () => {
-    const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaReturnBase<string>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
 
     await prepare({ projectPath: "b", includeSymbols: true }, context);
 
@@ -89,8 +95,7 @@ describe("prepare", () => {
     ]);
   });
 
-  it("should throw when command fails", async () => {
-    const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
+  it("should throw when command throws", async () => {
     execaMock.mockImplementationOnce(() => {
       throw new Error("Something went wrong.");
     });
@@ -98,9 +103,22 @@ describe("prepare", () => {
     await expect(prepare({ projectPath: "b", includeSymbols: true }, context)).rejects.toThrow("dotnet pack failed");
   });
 
+  it("should throw when command fails", async () => {
+    execaMock.mockImplementationOnce(() => {
+      const result: Partial<ExecaError> = {
+        command: "dotnet pack",
+        exitCode: 1,
+      };
+      throw result;
+    });
+
+    await expect(prepare({ projectPath: "b", includeSymbols: true }, context)).rejects.toThrow(
+      "dotnet pack failed with exit code 1",
+    );
+  });
+
   it("should add PackageVersion argument when usePackageVersion is set to true", async () => {
-    const execaMock = execa as unknown as jest.Mock<ExecaReturnBase<string>, never[]>;
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaReturnBase<string>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
 
     await prepare({ projectPath: "src/SomeProject/SomeProject.csproj", usePackageVersion: true }, context);
 
