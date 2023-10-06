@@ -182,7 +182,7 @@ describe("publish", () => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as any;
+      } as Partial<ExecaChildProcess> as never;
     });
 
     await publish(
@@ -202,7 +202,7 @@ describe("publish", () => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as any;
+      } as Partial<ExecaChildProcess> as never;
     });
 
     await publish(
@@ -221,7 +221,7 @@ describe("publish", () => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as any;
+      } as Partial<ExecaChildProcess> as never;
     });
 
     (context.logger.log as jest.Mock).mockReset();
@@ -239,7 +239,7 @@ describe("publish", () => {
         command:
           "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as any;
+      } as Partial<ExecaChildProcess> as never;
     });
 
     process.env.CI_SERVER_URL = "https://gitlab.example.com";
