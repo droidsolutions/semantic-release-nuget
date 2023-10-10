@@ -13,10 +13,6 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
   const baseCliArgs: string[] = ["nuget", "push"];
   const token: string = process.env.NUGET_TOKEN!;
 
-  if (pluginConfig.dotnetVerbosity) {
-    baseCliArgs.push("-v", pluginConfig.dotnetVerbosity);
-  }
-
   if (pluginConfig.skipPublishToNuget) {
     context.logger.log("Skipping publish to NuGet server because skipPublishToNuget is set to true.");
   } else {
