@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.3.0...v1.4.0) (2023-10-10)
+
+
+### Features
+
+* add dotnetVerbosity option ([7971c60](https://github.com/droidsolutions/semantic-release-nuget/commit/7971c60f540fd9c9ede05c35d22ca72294972720))
+
 # [1.3.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.2.0...v1.3.0) (2023-09-18)
 
 
