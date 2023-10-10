@@ -29,6 +29,10 @@ export const prepare = async (pluginConfig: Config & UserConfig, context: Prepar
         cliArgs.push(`-p:PackageVersion=${context.nextRelease!.version}`);
       }
 
+      if (pluginConfig.dotnetVerbosity) {
+        cliArgs.push("-v", pluginConfig.dotnetVerbosity);
+      }
+
       context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
 
       await execa(dotnet, cliArgs, { stdio: "inherit" });

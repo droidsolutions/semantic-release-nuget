@@ -72,6 +72,7 @@ The NuGet server authentication is **required** and can be set via [environment 
 | `skipPublishToNuget`      | If true, the NuGet package will not be published to the `nugetServer`. You can use this together with `publishToGitLab` to **only** publish your package to the GitLab registry.          | `false`           |
 | `gitlabRegistryProjectId` | Can be set to publish the package to a different GitLab project. Only used when `publishToGitLab` is set to true.                                                                         | `CI_PROJECT_ID`   |
 | `gitlabUser`              | Needed when publishing to a separate GitLab project. If using a deploy token, to name of the token must be given, when using a personal access token, the name of the user must be given. | `gitlab-ci-token` |
+| `dotnetVerbosity`         | Optional string to pass to dotnet commands as verbosity argument. See [verbosity argument](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-pack) for valid values.             |                   |
 
 **Note**: If `usePackageVersion` is set the version from Semantic Release is given directly to the `dotnet pack` command via the `-p:PackageVersion=<version>` argument. In this case any existing version in project files are ignored.
 
