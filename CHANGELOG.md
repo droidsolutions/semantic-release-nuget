@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.4.0...v1.4.1) (2023-10-10)
+
+
+### Bug Fixes
+
+* **publish:** don't give invalid -v argument to dotnet nuget push ([9b7ea6e](https://github.com/droidsolutions/semantic-release-nuget/commit/9b7ea6e6f7ea0cb4e9157107724d3b91c7fd4e51))
+
 # [1.4.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.3.0...v1.4.0) (2023-10-10)
 
 
