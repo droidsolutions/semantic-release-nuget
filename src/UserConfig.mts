@@ -23,4 +23,6 @@ export interface UserConfig {
   gitlabRegistryProjectId?: number;
   /** Optional username to use with the token when authenticating at GitLab. */
   gitlabUser?: string;
+  /** If set, the given  will be added to .NET commands. */
+  dotnetVerbosity?: string;
 }

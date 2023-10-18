@@ -14,7 +14,7 @@ jobs:
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Run ESLint
-        run: npx eslint --ext .ts,.js .
+        run: npx eslint --ext .mts,.ts,.js .
   build:
     name: Transpile TypeScript
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: ["16", "18"]
+        node: ["18", "20"]
     steps:
       - uses: actions/checkout@v4
       - name: Use NodeJS
@@ -49,7 +49,7 @@ jobs:
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Collect Coverage
-        run: npx jest --coverage
+        run: node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js --coverage
   release:
     name: Semantic Release
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
@@ -60,10 +60,12 @@ jobs:
       - test
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Use NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Download dist from build

@@ -1,3 +1,25 @@
+## [1.4.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.4.0...v1.4.1) (2023-10-10)
+
+
+### Bug Fixes
+
+* **publish:** don't give invalid -v argument to dotnet nuget push ([9b7ea6e](https://github.com/droidsolutions/semantic-release-nuget/commit/9b7ea6e6f7ea0cb4e9157107724d3b91c7fd4e51))
+
+# [1.4.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.3.0...v1.4.0) (2023-10-10)
+
+
+### Features
+
+* add dotnetVerbosity option ([7971c60](https://github.com/droidsolutions/semantic-release-nuget/commit/7971c60f540fd9c9ede05c35d22ca72294972720))
+
+# [1.3.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.2.0...v1.3.0) (2023-09-18)
+
+
+### Features
+
+* add gitlabRegistryProjectId config ([e2c29aa](https://github.com/droidsolutions/semantic-release-nuget/commit/e2c29aa4e9ebf486ece0bf079ff80ca4112a8696))
+* **GitLab:** allow to provide a username when publishing to separate GitLab project ([49de3d1](https://github.com/droidsolutions/semantic-release-nuget/commit/49de3d18df6eb5d0f792681e843cc5d939152ae2)), closes [#624](https://github.com/droidsolutions/semantic-release-nuget/issues/624)
+
 # [1.3.0-beta.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.3.0-beta.1...v1.3.0-beta.2) (2023-09-11)
 
 
