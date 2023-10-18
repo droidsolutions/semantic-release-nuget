@@ -1,3 +1,21 @@
+# [2.0.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.4.1...v2.0.0-beta.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* use OS agnostic path separator ([3cb4c0a](https://github.com/droidsolutions/semantic-release-nuget/commit/3cb4c0a40e65afa3bcc98dd703f20252e19fd62a)), closes [#686](https://github.com/droidsolutions/semantic-release-nuget/issues/686)
+
+
+### Features
+
+* convert library to ESM ([1429d96](https://github.com/droidsolutions/semantic-release-nuget/commit/1429d96997d3ae6ae32dec3173b328af13aa9ae6)), closes [#678](https://github.com/droidsolutions/semantic-release-nuget/issues/678) [#634](https://github.com/droidsolutions/semantic-release-nuget/issues/634)
+
+
+### BREAKING CHANGES
+
+* this library is now build and published as ESM package to follow official Semantic
+Release plugins
+
 ## [1.4.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.4.0...v1.4.1) (2023-10-10)
 
 
