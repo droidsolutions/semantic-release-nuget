@@ -1,3 +1,10 @@
+# [2.0.0-beta.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.0-beta.1...v2.0.0-beta.2) (2023-10-18)
+
+
+### Bug Fixes
+
+* update exports in package.json ([651e34b](https://github.com/droidsolutions/semantic-release-nuget/commit/651e34bafe2ed7c6a9f525b2f771fc0ad907eab1))
+
 # [2.0.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.4.1...v2.0.0-beta.1) (2023-10-18)
 
 
