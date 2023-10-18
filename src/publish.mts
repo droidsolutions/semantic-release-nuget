@@ -1,6 +1,6 @@
 import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
-import { resolve } from "path";
+import { resolve, sep } from "path";
 import { Config, PublishContext } from "semantic-release";
 import { isExecaError, publishFailed } from "./Helper.mjs";
 import { UserConfig } from "./UserConfig.mjs";
@@ -18,7 +18,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
     try {
       const cliArgs = [...baseCliArgs, "-s", registry, "-k", token];
 
-      cliArgs.push(`${packagePath}/*.nupkg`);
+      cliArgs.push(`${packagePath}${sep}*.nupkg`);
 
       const argStrings = cliArgs.map((value) => (value === token ? "[redacted]" : value)).join(" ");
       context.logger.log(`running command "${dotnet} ${argStrings}" ...`);
