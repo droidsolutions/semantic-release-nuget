@@ -10,9 +10,7 @@
     "dist/src/*"
   ],
   "exports": {
-    ".": {
-      "import": "./dist/index.mjs"
-    }
+    ".": "./dist/index.mjs"
   },
   "scripts": {
     "lint": "eslint --ext ts,js,mts,mjs .",
