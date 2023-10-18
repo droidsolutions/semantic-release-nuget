@@ -97,7 +97,6 @@ The following is an example how to use this plugin to build semantic versioned N
 ```xml
 <Project>
   <PropertyGroup>
-    <VersionPrefix>1.12.0</VersionPrefix>
     <Authors>Stefan Ißmer</Authors>
     <Description>Library for working with jobs that may be recurring in distributed systems and microservices.</Description>
     <Company>DroidSolutions GmbH</Company>
