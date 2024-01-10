@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.0...v2.0.1) (2024-01-10)
+
+
+### Bug Fixes
+
+* [#777](https://github.com/droidsolutions/semantic-release-nuget/issues/777) check for existing NuGet source before adding ([e3047bb](https://github.com/droidsolutions/semantic-release-nuget/commit/e3047bb3b0d84a69a36524d6a36b4d9959478f66))
+
 # [2.0.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v1.4.1...v2.0.0) (2023-10-19)
 
 
