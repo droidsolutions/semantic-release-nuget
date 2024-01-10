@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals";
-import type { ExecaChildProcess, ExecaError, execa } from "execa";
+import type { ExecaChildProcess, ExecaError, ExecaReturnBase, execa } from "execa";
 import { PublishContext } from "semantic-release";
 import { publishFailed } from "../src/Helper.mjs";
 import type { publish as publishType } from "../src/publish.mjs";
@@ -236,6 +236,13 @@ describe("publish", () => {
   it("should use gitlabRegistryProjectId over CI_PROJECT_ID if set", async () => {
     execaMock.mockImplementationOnce(() => {
       return {
+        stdout:
+          "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
+        exitCode: 0,
+      } as Partial<ExecaReturnBase<string>> as never;
+    });
+    execaMock.mockImplementationOnce(() => {
+      return {
         command:
           "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
@@ -255,8 +262,8 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(2);
-    expect(execaMock.mock.calls[0]).toEqual([
+    expect(execaMock).toHaveBeenCalledTimes(3);
+    expect(execaMock.mock.calls[1]).toEqual([
       "dotnet",
       [
         "nuget",

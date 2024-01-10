@@ -62,24 +62,31 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
     }
 
     const url = `${process.env.CI_SERVER_URL!}/api/v4/projects/${projectId}/packages/nuget/index.json`;
-    context.logger.log(`Adding GitLab as NuGet source ${url}`);
-    await execa(
-      dotnet,
-      [
-        "nuget",
-        "add",
-        "source",
-        url,
-        "--name",
-        "gitlab",
-        "--username",
-        gitlabUser,
-        "--password",
-        gitlabToken,
-        "--store-password-in-clear-text",
-      ],
-      { stdio: "inherit" },
-    );
+
+    // Check if there is already a NuGet source with the GitLab url before adding it
+    const { stdout } = await execa(dotnet, ["nuget", "list", "source", "--format", "short"]);
+    if (stdout?.includes(url) === true) {
+      context.logger.log(`GitLab NuGet source ${url} already exists, skip adding`);
+    } else {
+      context.logger.log(`Adding GitLab as NuGet source ${url}`);
+      await execa(
+        dotnet,
+        [
+          "nuget",
+          "add",
+          "source",
+          url,
+          "--name",
+          "gitlab",
+          "--username",
+          gitlabUser,
+          "--password",
+          gitlabToken,
+          "--store-password-in-clear-text",
+        ],
+        { stdio: "inherit" },
+      );
+    }
 
     const cliArgs = [...baseCliArgs, "--source", "gitlab", `${packagePath}/*.nupkg`];
 
