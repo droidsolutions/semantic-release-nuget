@@ -39,7 +39,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "execa": "^8.0.1"
+    "execa": "^9.1.0"
   },
   "devDependencies": {
     "@commitlint/cli": "19.3.0",
