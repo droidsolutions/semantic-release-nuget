@@ -48,7 +48,8 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
       if (!stats.isFile()) {
         throw new Error(`The given project path ${projectPath} is not a file.`);
       }
-    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       errors.push(new Error(`The given project path ${projectPath} could not be found.`));
     }
   }
@@ -57,7 +58,8 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
 
   try {
     await execa(dotnet, ["--info"], { stdio: "inherit" });
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
     errors.push(new Error(`Unable to find dotnet executable in ${dotnet}`));
   }
 
