@@ -14,7 +14,7 @@ jobs:
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Run ESLint
-        run: npx eslint --ext .mts,.ts,.js .
+        run: npx eslint .
   build:
     name: Transpile TypeScript
     runs-on: ubuntu-latest

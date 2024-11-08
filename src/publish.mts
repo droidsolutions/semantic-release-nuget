@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
 import { resolve, sep } from "path";
@@ -6,7 +8,7 @@ import { isExecaError, publishFailed } from "./Helper.mjs";
 import { UserConfig } from "./UserConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
-  const dotnet = pluginConfig.dotnet || "dotnet";
+  const dotnet = pluginConfig.dotnet ?? "dotnet";
   const registry = pluginConfig.nugetServer ?? "https://api.nuget.org/v3/index.json";
   const packagePath = resolve("out");
   const baseCliArgs: string[] = ["nuget", "push"];
@@ -31,7 +33,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
         let description = error.command;
 
         // hide token from SR output
-        if (error.command && error.command.includes(token)) {
+        if (error.command?.includes(token)) {
           description = description.replace(token, "[redacted]");
         }
 
@@ -51,8 +53,8 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
   }
 
   try {
-    let projectId = parseInt(process.env.CI_PROJECT_ID as string, 10);
-    let gitlabToken = process.env.CI_JOB_TOKEN as string;
+    let projectId = parseInt(process.env.CI_PROJECT_ID!, 10);
+    let gitlabToken = process.env.CI_JOB_TOKEN!;
     let gitlabUser = "gitlab-ci-token";
 
     if (pluginConfig.gitlabRegistryProjectId) {

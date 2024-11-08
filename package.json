@@ -13,7 +13,7 @@
     ".": "./dist/index.mjs"
   },
   "scripts": {
-    "lint": "eslint --ext ts,js,mts,mjs .",
+    "lint": "eslint .",
     "build": "tsc",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
@@ -53,8 +53,7 @@
     "@types/semantic-release": "20.0.6",
     "@typescript-eslint/eslint-plugin": "8.13.0",
     "@typescript-eslint/parser": "8.13.0",
-    "eslint": "8.57.0",
-    "eslint-config-prettier": "9.1.0",
+    "eslint": "9.14.0",
     "eslint-plugin-jest": "28.9.0",
     "eslint-plugin-n": "17.13.1",
     "eslint-plugin-prettier": "5.2.1",
@@ -64,14 +63,15 @@
     "prettier": "3.3.3",
     "semantic-release": "24.2.0",
     "ts-jest": "29.2.5",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.13.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "lint-staged": {
     "*.{ts,js,json,yml,md}": "prettier --write",
-    "*.{ts,js}": "eslint --ext .js,.ts,.mts,.mjs"
+    "*.{ts,js}": "eslint"
   },
   "commitlint": {
     "extends": [
