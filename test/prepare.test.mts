@@ -18,7 +18,6 @@ describe("prepare", () => {
     context = {
       branch: { name: "main" },
       env: {},
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
       nextRelease: { gitTag: "v1.0.0", notes: "", type: "major", gitHead: "", version: "1.0.0" },
     } as PrepareContext;
@@ -30,7 +29,7 @@ describe("prepare", () => {
     prepare = prepareImport.prepare;
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     execaMock.mockReset();
   });
 
@@ -109,7 +108,7 @@ describe("prepare", () => {
         command: "dotnet pack",
         exitCode: 1,
       };
-      throw result;
+      throw result as ExecaError;
     });
 
     await expect(prepare({ projectPath: "b", includeSymbols: true }, context)).rejects.toThrow(

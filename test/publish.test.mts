@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import type { ExecaChildProcess, ExecaError, ExecaReturnBase, execa } from "execa";
 import { PublishContext } from "semantic-release";
@@ -18,7 +19,6 @@ describe("publish", () => {
     context = {
       branch: { name: "main" },
       env: {},
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
       nextRelease: {
         channel: "main",
@@ -126,10 +126,9 @@ describe("publish", () => {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 1,
       };
-      throw result;
+      throw result as ExecaError;
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let thrown: any | undefined = undefined;
     try {
       await publish({ projectPath: ["a/path/to/project"] }, context);
@@ -150,18 +149,17 @@ describe("publish", () => {
       throw new Error();
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let thrown: any | undefined = undefined;
     try {
       process.env.CI_SERVER_URL = "https://gitlab.example.com";
       await publish({ projectPath: ["a/path/to/project"], skipPublishToNuget: true, publishToGitLab: true }, context);
     } catch (err) {
-      thrown = err as Error;
+      thrown = err as ExecaError;
     }
 
     expect(thrown).not.toBeUndefined();
-    expect(thrown.message).toBe("publish to GitLab failed");
-    expect(thrown.code).toBe(publishFailed);
+    expect(thrown!.message).toBe("publish to GitLab failed");
+    expect(thrown!.code).toBe(publishFailed);
   });
 
   it("should not publish to nugetServer when skipPublishToNuget is true", async () => {

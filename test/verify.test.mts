@@ -20,7 +20,6 @@ describe("verify", () => {
     context = {
       branch: { name: "main" },
       env: {},
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       logger: { log: logMock, error: logMock } as any,
     } as VerifyConditionsContext;
     const { execa } = await import("execa");

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import SRError from "@semantic-release/error";
 import { execa } from "execa";
 import { resolve } from "path";
@@ -6,14 +8,14 @@ import { isExecaError, packFailed } from "./Helper.mjs";
 import { UserConfig } from "./UserConfig.mjs";
 
 export const prepare = async (pluginConfig: Config & UserConfig, context: PrepareContext): Promise<void> => {
-  const dotnet = pluginConfig.dotnet || "dotnet";
+  const dotnet = pluginConfig.dotnet ?? "dotnet";
 
   try {
     pluginConfig.projectPath = Array.isArray(pluginConfig.projectPath)
       ? pluginConfig.projectPath
       : [pluginConfig.projectPath];
 
-    for (const projectPath of pluginConfig.projectPath as string[]) {
+    for (const projectPath of pluginConfig.projectPath) {
       const project = resolve(projectPath);
 
       const cliArgs = ["pack", project, "-c", "Release", "-o", "out"];
@@ -25,8 +27,7 @@ export const prepare = async (pluginConfig: Config & UserConfig, context: Prepar
       }
 
       if (pluginConfig.usePackageVersion === true) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        cliArgs.push(`-p:PackageVersion=${context.nextRelease!.version}`);
+        cliArgs.push(`-p:PackageVersion=${context.nextRelease.version}`);
       }
 
       if (pluginConfig.dotnetVerbosity) {
