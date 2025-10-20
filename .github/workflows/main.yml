@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Use NodeJS
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Run ESLint
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Use NodeJS
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
       - name: Install packages
         run: npm ci --no-fund --ignore-scripts
       - name: Run ESLint
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Use NodeJS
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
       - name: Install packages
@@ -63,7 +63,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Use NodeJS
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: 24
       - name: Install packages
