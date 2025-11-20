@@ -3,6 +3,9 @@ name: main
 on:
   push:
 
+permissions:
+  contents: read # for checkout
+
 jobs:
   lint:
     name: Check - Lint
@@ -54,20 +57,31 @@ jobs:
     name: Semantic Release
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for trusted publishing and npm provenance
     needs:
       - lint
       - build
       - test
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
+          fetch-depth: 0
           persist-credentials: false
-      - name: Use NodeJS
+      - name: Setup NodeJS
         uses: actions/setup-node@v6
         with:
-          node-version: 24
-      - name: Install packages
+          node-version: "lts/*"
+      - name: Install dependencies
         run: npm ci --no-fund --ignore-scripts
+        env:
+          HUSKY: 0
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
       - name: Download dist from build
         uses: actions/download-artifact@v6
         with:
@@ -76,5 +90,5 @@ jobs:
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+         # NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
