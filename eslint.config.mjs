@@ -1,12 +1,13 @@
+import { defineConfig } from "eslint/config";
 import eslint from "@eslint/js";
 import jest from "eslint-plugin-jest";
 import node from "eslint-plugin-n";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default defineConfig(
   {
-    ignores: ["coverage/**", "dist/**", "eslint.config.mjs", "jest.config.cjs"],
+    ignores: [".vscode/**", "coverage/**", "dist/**", "eslint.config.mjs", "jest.config.cjs"],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
