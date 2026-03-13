@@ -39,11 +39,16 @@ describe("publish", () => {
     process.env.CI_REGISTRY_USER = "its-a-me-mario";
     process.env.CI_REGISTRY_PASSWORD = "hunter2";
     process.env.NUGET_TOKEN = "104E4";
+    process.env.CI_JOB_TOKEN = "some-ci-token";
     process.env.CI_PROJECT_ID = "132";
   });
 
   afterEach(() => {
     execaMock.mockReset();
+  });
+
+  beforeEach(() => {
+    execaMock.mockResolvedValue({ stdout: "" } as any);
   });
 
   it("should call execa with the correct arguments when given minimum config", async () => {
@@ -54,8 +59,8 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(1);
-    expect(execaMock.mock.calls[0]).toEqual([
+    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock.mock.calls[1]).toEqual([
       "dotnet",
       [
         "nuget",
@@ -79,8 +84,8 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(1);
-    expect(execaMock.mock.calls[0]).toEqual([
+    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock.mock.calls[1]).toEqual([
       "dotnet",
       [
         "nuget",
@@ -104,8 +109,8 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(1);
-    expect(execaMock.mock.calls[0]).toEqual([
+    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock.mock.calls[1]).toEqual([
       "/usr/lib64/dotnet",
       [
         "nuget",
@@ -121,6 +126,7 @@ describe("publish", () => {
   });
 
   it("should report error when pushing fails and mask nuget token", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
     execaMock.mockImplementationOnce(() => {
       const result: Partial<ExecaError> = {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -143,10 +149,11 @@ describe("publish", () => {
     expect(thrown.code).toBe(publishFailed);
     expect(thrown.details).toBe("dotnet nuget push -s https://api.nuget.org/v3/index.json -k [redacted] out/*.nupkg");
 
-    expect(execaMock).toHaveBeenCalledTimes(1);
+    expect(execaMock).toHaveBeenCalledTimes(2);
   });
 
   it("should report error when execa throws", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
     execaMock.mockImplementationOnce(() => {
       throw new Error();
     });
@@ -160,7 +167,7 @@ describe("publish", () => {
     }
 
     expect(thrown).not.toBeUndefined();
-    expect(thrown!.message).toBe("publish to GitLab failed");
+    expect(thrown!.message).toBe("publish to registry https://gitlab.example.com/api/v4/projects/132/packages/nuget/index.json failed");
     expect(thrown!.code).toBe(publishFailed);
   });
 
@@ -174,10 +181,12 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).not.toHaveBeenCalled();
+    expect(execaMock).toHaveBeenCalledTimes(1);
+    expect(execaMock.mock.calls[0]).toEqual(["dotnet", ["nuget", "list", "source"]]);
   });
 
   it("should publish to nugetServer when skipPublishToNuget is false", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
     execaMock.mockImplementationOnce((_f: any, _a?: any, _o?: any) => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -194,10 +203,11 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(1);
+    expect(execaMock).toHaveBeenCalledTimes(2);
   });
 
   it("should publish to nugetServer when skipPublishToNuget is not set", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
     execaMock.mockImplementationOnce(() => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -213,10 +223,11 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(1);
+    expect(execaMock).toHaveBeenCalledTimes(2);
   });
 
   it("should redact nuget token from command output", async () => {
+    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
     execaMock.mockImplementationOnce(() => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -272,11 +283,11 @@ describe("publish", () => {
         "https://gitlab.example.com/api/v4/projects/12345/packages/nuget/index.json",
         "--name",
         "gitlab",
+        "--store-password-in-clear-text",
+        "--password",
+        "some-ci-token",
         "--username",
         "deploy-user",
-        "--password",
-        process.env.NUGET_TOKEN, // use NuGet token in this case
-        "--store-password-in-clear-text",
       ],
       { stdio: "inherit" },
     ]);

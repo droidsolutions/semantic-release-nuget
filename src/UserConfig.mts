@@ -1,3 +1,5 @@
+import { RegistryConfig } from "./RegistryConfig.mjs";
+
 /** The external configuration the user can made via Semantic Release. */
 export interface UserConfig {
   /** The relative path to the project to pack. */
@@ -25,4 +27,9 @@ export interface UserConfig {
   gitlabUser?: string;
   /** If set, the given  will be added to .NET commands. */
   dotnetVerbosity?: string;
+
+  /**
+   * The NuGet registries to publish to.
+   */
+  registries?: RegistryConfig[];
 }
