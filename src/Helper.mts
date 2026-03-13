@@ -5,8 +5,8 @@ import { ExecaError } from "execa";
  * @param err The error to check.
  * @returns True if the error is an ExecaError, false otherwise.
  */
-export const isExecaError = (err: unknown): err is ExecaError<string> => {
-  return (err as ExecaError<string>).exitCode !== undefined && (err as ExecaError<string>).command !== undefined;
+export const isExecaError = (err: unknown): err is ExecaError => {
+  return (err as ExecaError).exitCode !== undefined && (err as ExecaError).command !== undefined;
 };
 
 export const packFailed = "EDOTNET_PACK_FAILED";

@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals";
-import type { ExecaChildProcess, ExecaError, execa } from "execa";
+import { type ResultPromise, ExecaError, execa } from "execa";
 import { resolve } from "path";
 import type { PrepareContext } from "semantic-release";
 import type { prepare as prepareType } from "../src/prepare.mjs";
@@ -34,7 +34,7 @@ describe("prepare", () => {
   });
 
   it("should call pack with the correct arguments", async () => {
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ResultPromise);
 
     await prepare({ dotnet: "a", projectPath: "b" }, context);
 
@@ -47,7 +47,7 @@ describe("prepare", () => {
   });
 
   it("should use default dotnet command if not given", async () => {
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ResultPromise);
 
     await prepare({ projectPath: "b" }, context);
 
@@ -60,7 +60,7 @@ describe("prepare", () => {
   });
 
   it("should add include-source flag if set", async () => {
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ResultPromise);
 
     await prepare({ projectPath: "b", includeSource: true }, context);
 
@@ -73,7 +73,7 @@ describe("prepare", () => {
   });
 
   it("should add include-symbols flag if set", async () => {
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ResultPromise);
 
     await prepare({ projectPath: "b", includeSymbols: true }, context);
 
@@ -108,6 +108,8 @@ describe("prepare", () => {
         command: "dotnet pack",
         exitCode: 1,
       };
+
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw result as ExecaError;
     });
 
@@ -117,7 +119,7 @@ describe("prepare", () => {
   });
 
   it("should add PackageVersion argument when usePackageVersion is set to true", async () => {
-    execaMock.mockReturnValue({ exitCode: 0 } as ExecaChildProcess<Buffer>);
+    execaMock.mockReturnValue({ exitCode: 0 } as ResultPromise);
 
     await prepare({ projectPath: "src/SomeProject/SomeProject.csproj", usePackageVersion: true }, context);
 
