@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals";
-import type { ExecaChildProcess, ExecaError, ExecaReturnBase, execa } from "execa";
+import { execa, type ExecaError, type Result, type ResultPromise } from "execa";
 import { PublishContext } from "semantic-release";
 import { publishFailed } from "../src/Helper.mjs";
 import type { publish as publishType } from "../src/publish.mjs";
@@ -126,6 +126,8 @@ describe("publish", () => {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 1,
       };
+
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw result as ExecaError;
     });
 
@@ -176,11 +178,11 @@ describe("publish", () => {
   });
 
   it("should publish to nugetServer when skipPublishToNuget is false", async () => {
-    execaMock.mockImplementationOnce((_f, _a?, _o?) => {
+    execaMock.mockImplementationOnce((_f: any, _a?: any, _o?: any) => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as never;
+      } as Partial<ResultPromise> as never;
     });
 
     await publish(
@@ -200,7 +202,7 @@ describe("publish", () => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as never;
+      } as Partial<ResultPromise> as never;
     });
 
     await publish(
@@ -219,7 +221,7 @@ describe("publish", () => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as never;
+      } as Partial<ResultPromise> as never;
     });
 
     (context.logger.log as jest.Mock).mockReset();
@@ -237,14 +239,14 @@ describe("publish", () => {
         stdout:
           "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaReturnBase<string>> as never;
+      } as Partial<Result> as never;
     });
     execaMock.mockImplementationOnce(() => {
       return {
         command:
           "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
         exitCode: 0,
-      } as Partial<ExecaChildProcess> as never;
+      } as Partial<ResultPromise> as never;
     });
 
     process.env.CI_SERVER_URL = "https://gitlab.example.com";
