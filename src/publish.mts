@@ -4,7 +4,7 @@ import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
 import { resolve, sep } from "path";
 import { Config, PublishContext } from "semantic-release";
-import { isExecaError, publishFailed } from "./Helper.mjs";
+import { extractNugetSourcesFromListOutput, isExecaError, publishFailed } from "./Helper.mjs";
 import { UserConfig } from "./UserConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
@@ -66,9 +66,20 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
     const url = `${process.env.CI_SERVER_URL!}/api/v4/projects/${projectId}/packages/nuget/index.json`;
 
     // Check if there is already a NuGet source with the GitLab url before adding it
-    const { stdout } = await execa(dotnet, ["nuget", "list", "source", "--format", "short"]);
-    if (stdout?.includes(url) === true) {
-      context.logger.log(`GitLab NuGet source ${url} already exists, skip adding`);
+    let sourceName = "gitlab";
+    const { stdout } = await execa(dotnet, ["nuget", "list", "source"]);
+    const sources = extractNugetSourcesFromListOutput(stdout);
+
+    const source = sources?.find((s) => s.url === url);
+    if (source) {
+      if (source.enabled) {
+        context.logger.log(`A NuGet source with the needed url already exists, using source ${source.source}.`);
+        sourceName = source.source;
+      } else {
+        context.logger.log(`Enabling the existing NuGet source ${source.source}.`);
+        await execa(dotnet, ["nuget", "enable", source.source], { stdio: "inherit" });
+        sourceName = source.source;
+      }
     } else {
       context.logger.log(`Adding GitLab as NuGet source ${url}`);
       await execa(
@@ -79,7 +90,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
           "source",
           url,
           "--name",
-          "gitlab",
+          sourceName,
           "--username",
           gitlabUser,
           "--password",
