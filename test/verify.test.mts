@@ -205,11 +205,10 @@ describe("verify", () => {
     await expect(promise).resolves.toBeUndefined();
   });
 
-  it("should report an error when a registry has no URL configured", async () => {
-    process.env.MY_TOKEN = "some-token";
+  it("should report an error when a registry has no tokenEnvVar configured and NUGET_TOKEN is not set", async () => {
     const config = {
       projectPath: "test/fixture/some.csproj",
-      registries: [{ name: "my-registry", tokenEnvVar: "MY_TOKEN" }],
+      nugetRegistries: [{ name: "my-registry", url: "https://example.com" }],
     } as UserConfig;
 
     let actualErr: SemanticReleaseError | undefined;
@@ -220,31 +219,14 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("Registry my-registry has no URL configured.");
-  });
-
-  it("should report an error when a registry has no tokenEnvVar configured", async () => {
-    const config = {
-      projectPath: "test/fixture/some.csproj",
-      registries: [{ name: "my-registry", url: "https://example.com" }],
-    } as UserConfig;
-
-    let actualErr: SemanticReleaseError | undefined;
-    try {
-      await verify(config, context);
-    } catch (err) {
-      actualErr = err as SemanticReleaseError;
-    }
-
-    expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("Registry my-registry has no token environment variable configured.");
+    expect(actualErr?.details).toBe("Environment variable NUGET_TOKEN for registry my-registry is not set.");
   });
 
   it("should report an error when the token environment variable for a registry is not set", async () => {
     delete process.env.MY_TOKEN;
     const config = {
       projectPath: "test/fixture/some.csproj",
-      registries: [{ name: "my-registry", url: "https://example.com", tokenEnvVar: "MY_TOKEN" }],
+      nugetRegistries: [{ name: "my-registry", url: "https://example.com", tokenEnvVar: "MY_TOKEN" }],
     } as UserConfig;
 
     let actualErr: SemanticReleaseError | undefined;
@@ -256,5 +238,23 @@ describe("verify", () => {
 
     expect(actualErr).toBeDefined();
     expect(actualErr?.details).toBe("Environment variable MY_TOKEN for registry my-registry is not set.");
+  });
+
+  it("should resolve environment variables in GitLab registry configuration", async () => {
+    process.env.CI_SERVER_URL = "https://gitlab.example.com";
+    process.env.CI_PROJECT_ID = "132";
+    process.env.CI_JOB_TOKEN = "a3lhjli";
+
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [
+        {
+          name: "gitlab",
+          type: "gitlab",
+        },
+      ],
+    } as UserConfig;
+
+    await expect(verify(config, context)).resolves.toBeUndefined();
   });
 });

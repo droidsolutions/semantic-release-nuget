@@ -31,5 +31,5 @@ export interface UserConfig {
   /**
    * The NuGet registries to publish to.
    */
-  registries?: RegistryConfig[];
+  nugetRegistries?: RegistryConfig[];
 }

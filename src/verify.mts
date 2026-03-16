@@ -34,8 +34,12 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
         if (!process.env.CI_JOB_TOKEN && !process.env.NUGET_TOKEN) {
           errors.push(new Error("Environment variable CI_JOB_TOKEN or NUGET_TOKEN must be set for GitLab registry."));
         }
-      } else {
-        errors.push(new Error(`Registry ${registry.name} has no token environment variable configured.`));
+      } else if (!process.env.NUGET_TOKEN) {
+        errors.push(
+          new Error(
+            `Registry ${registry.name} has no token environment variable configured and NUGET_TOKEN is not set.`,
+          ),
+        );
       }
     } else if (!process.env[registry.tokenEnvVar]) {
       errors.push(new Error(`Environment variable ${registry.tokenEnvVar} for registry ${registry.name} is not set.`));

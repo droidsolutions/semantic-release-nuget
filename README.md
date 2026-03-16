@@ -1,12 +1,14 @@
 # semantic-release-nuget
 
-[**semantic-release**](https://github.com/semantic-release/semantic-release) plugin to create and publish a [NuGet](https://www.nuget.org/) package.
+[**semantic-release**](https://github.com/semantic-release/semantic-release) plugin to create and publish [NuGet](https://www.nuget.org/) packages.
 
-| Step               | Description                                                                                                                                                 |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `verifyConditions` | Verify the presence of the NUGET_TOKEN environment variable and the presence of the dotnet executable as well as correctness of the provided plugin config. |
-| `prepare`          | Creates NuGet packages.                                                                                                                                     |
-| `publish`          | Publishes the created [NuGet packages](https://docs.microsoft.com/en-us/nuget/what-is-nuget) to the given registries.                                       |
+![NPM Version](https://img.shields.io/npm/v/%40droidsolutions-oss%2Fsemantic-release-nuget?style=flat)
+
+| Step               | Description                                                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `verifyConditions` | Verify the correctness of the provided plugin config.                                                                 |
+| `prepare`          | Creates NuGet packages.                                                                                               |
+| `publish`          | Publishes the created [NuGet packages](https://docs.microsoft.com/en-us/nuget/what-is-nuget) to the given registries. |
 
 ## Install
 
@@ -41,7 +43,7 @@ The plugin can be configured in the [**semantic-release** configuration file](ht
 }
 ```
 
-**Hint**: you can use the `@droidsolutions-oss/semantic-release-update-file` plugin to update the version number in a project or `Directory.Build.props` file before creating the NuGet package.
+**Hint**: you can use the [@droidsolutions-oss/semantic-release-update-file](https://github.com/droidsolutions/semantic-release-update-file) plugin to update the version number in a project or `Directory.Build.props` file before creating the NuGet package.
 
 ## Configuration
 
@@ -60,27 +62,61 @@ The NuGet server authentication is **required** and can be set via [environment 
 
 ### Options
 
-| Options                   | Description                                                                                                                                                                               | Default                               |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `nugetServer`             | The URL of the NuGet server to push the package to.                                                                                                                                       | `https://api.nuget.org/v3/index.json` |
-| `projectPath`             | The relative path to the project file to pack. Can also be an array including multiple projects.                                                                                          |                                       |
-| `includeSymbols`          | If true an extra package with debug symbols will be created.                                                                                                                              | `false`                               |
-| `includeSource`           | If true source code will be included in the package which helps when consumers need to debug your library.                                                                                | `false`                               |
-| `dotnet`                  | The path to the dotnet executable if not in PATH.                                                                                                                                         | `dotnet`                              |
-| `publishToGitLab`         | If true, package will also be published to the GitLab registry.                                                                                                                           | `false`                               |
-| `usePackageVersion`       | If true, the new version from Semantic Release is directly given to `dotnet pack` command, else the version set in `csproj` or `Directory.Build.props` is used for the NuGet package.     | `false`                               |
-| `skipPublishToNuget`      | If true, the NuGet package will not be published to the `nugetServer`. You can use this together with `publishToGitLab` to **only** publish your package to the GitLab registry.          | `false`                               |
-| `gitlabRegistryProjectId` | Can be set to publish the package to a different GitLab project. Only used when `publishToGitLab` is set to true.                                                                         | `CI_PROJECT_ID`                       |
-| `gitlabUser`              | Needed when publishing to a separate GitLab project. If using a deploy token, to name of the token must be given, when using a personal access token, the name of the user must be given. | `gitlab-ci-token`                     |
-| `dotnetVerbosity`         | Optional string to pass to the dotnet pack command as verbosity argument. See [verbosity argument](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-pack) for valid values.     |                                       |
+| Options                         | Description                                                                                                                                                                                                                    | Default                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| `nugetRegistries`               | A list of NuGet registry configurations to publish to.                                                                                                                                                                         | see below                                   |
+| `nugetRegistries[].type`        | The type of the NuGet registry. Possible values are `nuget`, `gitlab`.                                                                                                                                                         | `nuget`                                     |
+| `nugetRegistries[].name`        | Name of the source for logging and recognation from nuget.config.                                                                                                                                                              | `nuget`                                     |
+| `nugetRegistries[].url`         | The URL to the NuGet registry.                                                                                                                                                                                                 | `https://api.nuget.org/v3/index.json`       |
+| `nugetRegistries[].user`        | The user to login to the NuGet registry.                                                                                                                                                                                       |                                             |
+| `nugetRegistries[].tokenEnvVar` | The name of the environment variable that contains the password or token to authenticate against the NuGet registry.                                                                                                           | `NUGET_TOKEN` or `CI_JOB_TOKEN` for GitLab. |
+| `projectPath`                   | The relative path to the project file to pack. Can also be an array including multiple projects.                                                                                                                               |                                             |
+| `nugetServer`                   | **Depcrecated**, use nugetRegistries[].url instead. The URL of the NuGet server to push the package to.                                                                                                                        | `https://api.nuget.org/v3/index.json`       |
+| `includeSymbols`                | If true an extra package with debug symbols will be created.                                                                                                                                                                   | `false`                                     |
+| `includeSource`                 | If true source code will be included in the package which helps when consumers need to debug your library.                                                                                                                     | `false`                                     |
+| `dotnet`                        | The path to the dotnet executable if not in PATH.                                                                                                                                                                              | `dotnet`                                    |
+| `publishToGitLab`               | **Depcrecated**, use nugetRegistries instead. If true, package will also be published to the GitLab registry.                                                                                                                  | `false`                                     |
+| `usePackageVersion`             | If true, the new version from Semantic Release is directly given to `dotnet pack` command, else the version set in `csproj` or `Directory.Build.props` is used for the NuGet package.                                          | `false`                                     |
+| `skipPublishToNuget`            | **Depcrecated**, use nugetRegistries instead. If true, the NuGet package will not be published to the `nugetServer`. You can use this together with `publishToGitLab` to **only** publish your package to the GitLab registry. | `false`                                     |
+| `gitlabRegistryProjectId`       | Can be set to publish the package to a different GitLab project. Only used when `publishToGitLab` is set to true.                                                                                                              | `CI_PROJECT_ID`                             |
+| `gitlabUser`                    | Needed when publishing to a separate GitLab project. If using a deploy token, to name of the token must be given, when using a personal access token, the name of the user must be given.                                      | `gitlab-ci-token`                           |
+| `dotnetVerbosity`               | Optional string to pass to the dotnet pack command as verbosity argument. See [verbosity argument](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-pack) for valid values.                                          |                                             |
 
-**Note**: If `publishToGitLab` is set the environment variables for `CI_SERVER_URL`, `CI_PROJECT_ID` and `CI_JOB_TOKEN` must be set. If you are running in GitLab CI this is automatically set by GitLab for you.
+With 2.1.0 configuration approach changed. Now a `nugetRegistries` array can be given to configure each registry the packages should be published to.
 
-**Note**: If `skipPublishToNuget` is set the package will not be published to the nuget server even if you specified an alternative via `nugetServer`. This only makes sense in combination with `publishToGitLab`.
+An empty config will lead to this default config:
+
+```json
+{
+  "nugetRegistries": [
+    {
+      "name": "nuget",
+      "url": "https://api.nuget.org/v3/index.json",
+      "tokenEnvVar": "NUGET_TOKEN",
+      "type": "nuget"
+    }
+  ]
+}
+```
+
+**Note**: If `publishToGitLab` is set the environment variables for `CI_SERVER_URL`, `CI_PROJECT_ID` and `CI_JOB_TOKEN` must be set. If you are running in GitLab CI this is automatically set by GitLab for you. The nugetRegistries config will be appended with this:
+
+```json
+{
+  "name": "gitlab",
+  "url": "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/packages/nuget/index.json",
+  "tokenEnvVar": "CI_JOB_TOKEN",
+  "type": "gitlab"
+}
+```
+
+**Note**: If `skipPublishToNuget` is set the package will not be published to the official nuget server. This only makes sense in combination with `publishToGitLab`. This is now deprecated, you should instead configure your registries via the `nugetRegistries` config.
 
 **Note**: When you add the [NPM plugin](https://raw.githubusercontent.com/semantic-release/npm) to update your `package.json` you should set `npmPublish` to `false` to prevent Semantic Release from trying to publish an NPM package.
 
-**Note**: When you want to publish your package to a different GitLab project with `gitlabRegistryProjectId` make sure the NUGET_TOKEN to a token that has access to it and also `gitlabUser` must be set to the user the token belongs to.
+**Note**: When you want to publish your package to a different GitLab project with `gitlabRegistryProjectId` make sure the NUGET_TOKEN is a token that has access to it and also `gitlabUser` must be set to the user the token belongs to.
+
+See config examples below for more info.
 
 ## Versioning
 
@@ -88,9 +124,86 @@ There are two ways how the version is set in the created NuGet package. The easi
 
 The recommended way to have your package versioned is to have the version in your project file. You can use a [Directory.Build.props](https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build) file to set the same version for all projects in your repository. Add a `VersionPrefix` (or `Version`) tag to it and use the [Semantic Release Update file plugin](https://github.com/droidsolutions/semantic-release-update-file) to update the version prior to creating the package. Make sure the `update-file` plugin is before the `git` plugin in the `plugins` list and add the project file or the `Directory.Build.props` to the assets list. See [example config](#example-config) below.
 
-## Example config
+## Config examples
 
-The following is an example how to use this plugin to build semantic versioned NuGet packages. Add a `Directory.Build.props` to your project, depending if you want to share the values in multiple projects of the same repository it can be anywhere from project root to next to your csproj file. This file can and should contain some metadata about your NuGet package.
+### Simple publish to nuget.org
+
+You don't need any config, just make sure the `NUGET_TOKEN` environment variable contains a valid token to publish to nuget.org.
+
+If you wan't to use another environment variable or just explicitly configure it, you can use this:
+
+```json
+{
+  "nugetRegistries": [
+    {
+      "name": "nuget",
+      "url": "https://api.nuget.org/v3/index.json",
+      "tokenEnvVar": "NUGET_TOKEN",
+      "type": "nuget"
+    }
+  ]
+}
+```
+
+### Publish to current GitLab project
+
+If you want to publish to the current GitLab project without special permissions you can use the following minimal exa,ple:
+
+```json
+{
+  "nugetRegistries": [
+    {
+      "type": "gitlab"
+    }
+  ]
+}
+```
+
+This will resolve the GitLab registry url from variables that are set in the GitLab CI:
+`${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/packages/nuget/index.json`. It will set `tokenEnvVar` to `CI_JOB_TOKEN` which is sufficient to publish packages to the current project.
+
+### Publish to a different GitLab project
+
+If you want to publish to a different GitLab project you probably need a GitLab token with the correct rights. Add the project id to the general config:
+
+```json
+{
+  "gitlabRegistryProjectId": 123,
+  "nugetRegistries": [
+    {
+      "type": "gitlab"
+    }
+  ]
+}
+```
+
+This will resolve the GitLab registry url from variables that are set in the GitLab CI:
+`${CI_SERVER_URL}/api/v4/projects/123/packages/nuget/index.json`. It will set `tokenEnvVar` to `NUGET_TOKEN` which is sufficient to publish packages to the current project. You can also set `tokenEnvVar` yourself if you want to use a different environment variable.
+
+### Publish to multiple registries
+
+If you want to publish to different registries you should set tokenEnvVar for each:
+
+```json
+{
+  "nugetRegistries": [
+    {
+      "name": "nuget",
+      "tokenEnvVar": "NUGET_TOKEN",
+      "type": "nuget"
+    },
+    {
+      "name": "gitlab",
+      "tokenEnvVar": "CI_JOB_TOKEN",
+      "type": "gitlab"
+    }
+  ]
+}
+```
+
+### Persist version changes in Directory.Build.props
+
+The following is an example how to use this plugin to build semantic versioned NuGet packages and persist the version in the project files. Add a `Directory.Build.props` to your project, depending if you want to share the values in multiple projects of the same repository it can be anywhere from project root to next to your csproj file. This file can and should contain some metadata about your NuGet package.
 
 **Note**: Instead of this special file you can also add those properties directly in your csproj file. If you do so, make sure you change the path for the update file plugin accordingly.
 
@@ -133,34 +246,41 @@ Now configure Semantic Release and use the update file plugin to update values i
           "package.json",
           "package-lock.json",
           "CHANGELOG.md",
-          "Directory.Build.props" // add updated file to the Semantic Release commit
+          "Directory.Build.props", // add updated file to the Semantic Release commit
         ],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-      }
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+      },
     ],
-    "@semantic-release/gitlab"
+    "@semantic-release/gitlab",
   ],
   "npmPublish": false, // prevent creating NPM package
-  "nugetServer": "https://nuget.mycomapny.com/v3/index.json", // custom (private) NuGet server
-  "projectPath": "src/DroidSolutions.Oss.JobService/DroidSolutions.Oss.JobService.csproj", // path to the project files
+  "nugetRegistries": [
+    {
+      "name": "custom-nuget",
+      "url": "https://nuget.mycomapny.com/v3/index.json", // custom (private) NuGet server, uses NUGET_TOKEN for auth
+      "type": "nuget",
+    },
+  ],
+  "projectPath": [
+    "src/DroidSolutions.Oss.JobService/DroidSolutions.Oss.JobService.csproj", // path to the project files
+  ],
   "includeSymbols": true, // include Debug symbols for easier debugging
-  "publishToGitLab": true, // also publish the package to your GitLab server
   "files": [
     {
       "path": ["Directory.Build.props"], // configure update-file plugin to update fields in Directory.Build.props
       "type": "xml",
       "replacements": [
         {
-          "key": "VersionPrefix",
-          "value": "${nextRelease.version}"
+          "key": "Version",
+          "value": "${nextRelease.version}",
         },
         {
           "key": "RepositoryCommit",
-          "value": "${CI_COMMIT_SHA}"
-        }
-      ]
-    }
-  ]
+          "value": "${CI_COMMIT_SHA}",
+        },
+      ],
+    },
+  ],
 }
 ```
 
@@ -185,5 +305,3 @@ you could also use something like this:
   ]
 }
 ```
-
-All NuGet packages will be in the `out` directory in project root and will be uploaded to the NuGet registry.

@@ -28,7 +28,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
     try {
       if (registryConfig.type === "nuget") {
-        const cliArgs = [...baseCliArgs, "-s", registryConfig.url, "-k", token];
+        const cliArgs: string[] = [...baseCliArgs, "-s", registryConfig.url!, "-k", token];
 
         cliArgs.push(join(packagePath, "*.nupkg"));
 

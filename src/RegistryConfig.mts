@@ -10,7 +10,7 @@ export interface RegistryConfig {
    * The URL to the registry to push to.
    * @example "https://api.nuget.org/v3/index.json"
    */
-  url: string;
+  url?: string;
 
   /**
    * The name of the environment variable that contains the token to authenticate with the registry.
@@ -28,5 +28,5 @@ export interface RegistryConfig {
    * The type of the registry, used to determine the command arguments to use when pushing to it.
    * If not set, "nuget" will be used as default.
    */
-  type?: "nuget" | "gitlab" | "github" | "generic";
+  type: "nuget" | "gitlab" | "github" | "generic";
 }

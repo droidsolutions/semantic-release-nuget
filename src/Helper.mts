@@ -37,23 +37,46 @@ export const extractNugetSourcesFromListOutput = (output: string): NuGetSource[]
 };
 
 export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] => {
-  if (config.registries && config.registries.length > 0) {
-    return config.registries.map((registry) => {
+  // Todo use CI_API_V4_URL instead of CI_SERVER_URL in the future. Possible breaking change.
+  if (config.nugetRegistries && config.nugetRegistries.length > 0) {
+    return config.nugetRegistries.map((registry) => {
       const normalized: RegistryConfig = { ...registry };
       if (normalized.type === undefined || normalized.type === null || (normalized.type as unknown as string) === "") {
         normalized.type = "nuget";
       }
+
       if (typeof normalized.name === "string") {
         normalized.name = normalized.name.trim();
       }
+
       if (typeof normalized.url === "string") {
         normalized.url = normalized.url.trim();
+      }
+
+      if (normalized.type === "nuget") {
+        normalized.name ??= "nuget";
+        normalized.url ??= "https://api.nuget.org/v3/index.json";
+        normalized.tokenEnvVar ??= "NUGET_TOKEN";
+      } else if (normalized.type === "gitlab") {
+        // resolve url from env vars
+        let projectId = process.env.CI_PROJECT_ID;
+        let defaultEnvVar = "CI_JOB_TOKEN";
+
+        if (config.gitlabRegistryProjectId) {
+          projectId = config.gitlabRegistryProjectId.toString();
+          defaultEnvVar = "NUGET_TOKEN";
+        }
+
+        normalized.name ??= "gitlab";
+        normalized.tokenEnvVar ??= defaultEnvVar;
+        normalized.url ??= `${process.env.CI_SERVER_URL}/api/v4/projects/${projectId}/packages/nuget/index.json`;
       }
 
       return normalized;
     });
   }
 
+  // Legacy handling, to be removed in next major version
   const registries: RegistryConfig[] = [];
 
   if (config.skipPublishToNuget !== true) {
