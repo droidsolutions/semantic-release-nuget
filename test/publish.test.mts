@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { afterEach, beforeAll, describe, expect, it, jest } from "@jest/globals";
-import { execa, type ExecaError, type Result, type ResultPromise } from "execa";
+import { execa, type ExecaError, type Options, type Result, type ResultPromise } from "execa";
 import { PublishContext } from "semantic-release";
 import { publishFailed } from "../src/Helper.mjs";
 import type { publish as publishType } from "../src/publish.mjs";
@@ -13,6 +13,7 @@ describe("publish", () => {
   let context: PublishContext;
   let execaMock: jest.Mock<typeof execa>;
   let publish: typeof publishType;
+  const emptyResult: Partial<Result<Options>> = { stdout: "" };
 
   beforeAll(async () => {
     const logMock = jest.fn();
@@ -48,7 +49,7 @@ describe("publish", () => {
   });
 
   beforeEach(() => {
-    execaMock.mockResolvedValue({ stdout: "" } as any);
+    execaMock.mockResolvedValue(emptyResult as Result<Options>);
   });
 
   it("should call execa with the correct arguments when given minimum config", async () => {
@@ -126,7 +127,7 @@ describe("publish", () => {
   });
 
   it("should report error when pushing fails and mask nuget token", async () => {
-    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
+    execaMock.mockResolvedValueOnce(emptyResult as Result<Options>);
     execaMock.mockImplementationOnce(() => {
       const result: Partial<ExecaError> = {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -153,7 +154,7 @@ describe("publish", () => {
   });
 
   it("should report error when execa throws", async () => {
-    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
+    execaMock.mockResolvedValueOnce(emptyResult as Result<Options>);
     execaMock.mockImplementationOnce(() => {
       throw new Error();
     });
@@ -167,7 +168,9 @@ describe("publish", () => {
     }
 
     expect(thrown).not.toBeUndefined();
-    expect(thrown!.message).toBe("publish to registry https://gitlab.example.com/api/v4/projects/132/packages/nuget/index.json failed");
+    expect(thrown!.message).toBe(
+      "publish to registry https://gitlab.example.com/api/v4/projects/132/packages/nuget/index.json failed",
+    );
     expect(thrown!.code).toBe(publishFailed);
   });
 
@@ -186,7 +189,7 @@ describe("publish", () => {
   });
 
   it("should publish to nugetServer when skipPublishToNuget is false", async () => {
-    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
+    execaMock.mockResolvedValueOnce(emptyResult as Result<Options>);
     execaMock.mockImplementationOnce((_f: any, _a?: any, _o?: any) => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -207,7 +210,7 @@ describe("publish", () => {
   });
 
   it("should publish to nugetServer when skipPublishToNuget is not set", async () => {
-    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
+    execaMock.mockResolvedValueOnce(emptyResult as Result<Options>);
     execaMock.mockImplementationOnce(() => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -227,7 +230,7 @@ describe("publish", () => {
   });
 
   it("should redact nuget token from command output", async () => {
-    execaMock.mockResolvedValueOnce({ stdout: "" } as any);
+    execaMock.mockResolvedValueOnce(emptyResult as Result<Options>);
     execaMock.mockImplementationOnce(() => {
       return {
         command: "dotnet nuget push -s https://api.nuget.org/v3/index.json -k 104E4 out/*.nupkg",
@@ -285,7 +288,7 @@ describe("publish", () => {
         "gitlab",
         "--store-password-in-clear-text",
         "--password",
-        "some-ci-token",
+        "104E4", // use NUGET_TOKEN when project ID is given, since CI_JOB_TOKEN can only push to the current project
         "--username",
         "deploy-user",
       ],

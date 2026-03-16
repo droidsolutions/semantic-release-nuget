@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
-import { resolve } from "path";
+import { join, resolve } from "path";
 import type { Config, PublishContext } from "semantic-release";
 import { extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed } from "./Helper.mjs";
 import type { NuGetSource } from "./NuGetSource.mjs";
@@ -30,7 +30,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
       if (registryConfig.type === "nuget") {
         const cliArgs = [...baseCliArgs, "-s", registryConfig.url, "-k", token];
 
-        cliArgs.push(`${packagePath}/*.nupkg`);
+        cliArgs.push(join(packagePath, "*.nupkg"));
 
         const argStrings = cliArgs.map((value) => (value === token ? "[redacted]" : value)).join(" ");
         context.logger.log(`running command "${dotnet} ${argStrings}" ...`);
@@ -48,7 +48,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
           sourceName = source.source;
         } else {
           context.logger.log(`Enabling the existing NuGet source ${source.source}.`);
-          await execa(dotnet, ["nuget", "enable", source.source], { stdio: "inherit" });
+          await execa(dotnet, ["nuget", "enable", "source", source.source], { stdio: "inherit" });
           sourceName = source.source;
         }
       } else {
@@ -72,7 +72,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
         await execa(dotnet, sourceArgs, { stdio: "inherit" });
       }
 
-      const cliArgs = [...baseCliArgs, "--source", sourceName, `${packagePath}/*.nupkg`];
+      const cliArgs = [...baseCliArgs, "--source", sourceName, join(packagePath, "*.nupkg")];
 
       context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
 
