@@ -64,11 +64,12 @@ export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] =>
         ? `${process.env.CI_SERVER_URL}/api/v4/projects/${projectId}/packages/nuget/index.json`
         : "";
 
+    // If user provides different GitLab project, CI_JOB_TOKEN may not be used, so we fall back to NUGET_TOKEN
     registries.push({
       name: "gitlab",
       url,
-      tokenEnvVar: "CI_JOB_TOKEN",
-      user: config.gitlabUser ?? "gitlab-ci-token",
+      tokenEnvVar: config.gitlabRegistryProjectId ? "NUGET_TOKEN" : "CI_JOB_TOKEN",
+      user: config.gitlabRegistryProjectId ? config.gitlabUser : (config.gitlabUser ?? "gitlab-ci-token"),
       type: "gitlab",
     });
   }
