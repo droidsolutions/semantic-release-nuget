@@ -1,6 +1,6 @@
 import { RegistryConfig } from "./RegistryConfig.mjs";
 
-/** The external configuration the user can made via Semantic Release. */
+/** The external configuration the user provides via Semantic Release. */
 export interface UserConfig {
   /** The relative path to the project to pack. */
   projectPath: string | string[];
