@@ -1,3 +1,17 @@
+# [2.1.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.1...v2.1.0-beta.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* always redact token in logs ([4988757](https://github.com/droidsolutions/semantic-release-nuget/commit/4988757a1b517015b7f63507dea3506e02174b1b))
+
+
+### Features
+
+* add support for multiple registries with new config ([4b887e6](https://github.com/droidsolutions/semantic-release-nuget/commit/4b887e6396387e9f054ef88c200ee61adfc49fcb))
+* add support for publish to GitHub registry ([451e574](https://github.com/droidsolutions/semantic-release-nuget/commit/451e574fc8f12e8d5551b18ab987d1e64460c46b))
+* parse sources from nuget.config ([a16d0a0](https://github.com/droidsolutions/semantic-release-nuget/commit/a16d0a0befeb7512375ab20f823007ed16f28418))
+
 ## [2.0.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.0...v2.0.1) (2024-01-10)
 
 
