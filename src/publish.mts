@@ -24,7 +24,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
   }
 
   for (const registryConfig of registries) {
-    const token = process.env[registryConfig.tokenEnvVar]!;
+    const token: string = process.env[registryConfig.tokenEnvVar!]!;
 
     try {
       if (registryConfig.type === "nuget") {
@@ -32,15 +32,15 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
         cliArgs.push(join(packagePath, "*.nupkg"));
 
-        const argStrings = cliArgs.map((value) => (value === token ? "[redacted]" : value)).join(" ");
-        context.logger.log(`running command "${dotnet} ${argStrings}" ...`);
+        const argStrings = cliArgs.join(" ");
+        context.logger.log(redactToken(`running command "${dotnet} ${argStrings}" ...`, token));
 
         await execa(dotnet, cliArgs, { stdio: "inherit" });
         continue;
       }
 
       const source = sources?.find((s) => s.url === registryConfig.url);
-      let sourceName = registryConfig.name;
+      let sourceName = registryConfig.name!;
 
       if (source) {
         if (source.enabled) {
@@ -78,15 +78,11 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
       await execa(dotnet, cliArgs, { stdio: "inherit" });
     } catch (error) {
-      context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
+      const message = redactToken(`${dotnet} push failed: ${(error as Error).message}`, token);
+      context.logger.error(message);
 
       if (isExecaError(error)) {
-        let description = error.command;
-
-        // hide token from SR output
-        if (error.command?.includes(token)) {
-          description = description.replace(token, "[redacted]");
-        }
+        const description = redactToken(error.command, token);
 
         throw new SemanticReleaseError(
           `publish to registry ${registryConfig.url} failed with exit code ${error.exitCode}`,
@@ -95,11 +91,11 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
         );
       }
 
-      throw new SemanticReleaseError(
-        `publish to registry ${registryConfig.url} failed`,
-        publishFailed,
-        (error as Error).message,
-      );
+      throw new SemanticReleaseError(`publish to registry ${registryConfig.url} failed`, publishFailed, message);
     }
   }
+};
+
+const redactToken = (message: string, token: string): string => {
+  return message.replaceAll(token, "[REDACTED]");
 };

@@ -148,7 +148,7 @@ describe("publish", () => {
     expect(thrown).not.toBeUndefined();
     expect(thrown.message).toBe("publish to registry https://api.nuget.org/v3/index.json failed with exit code 1");
     expect(thrown.code).toBe(publishFailed);
-    expect(thrown.details).toBe("dotnet nuget push -s https://api.nuget.org/v3/index.json -k [redacted] out/*.nupkg");
+    expect(thrown.details).toBe("dotnet nuget push -s https://api.nuget.org/v3/index.json -k [REDACTED] out/*.nupkg");
 
     expect(execaMock).toHaveBeenCalledTimes(2);
   });
@@ -241,7 +241,7 @@ describe("publish", () => {
     (context.logger.log as jest.Mock).mockReset();
 
     await publish({ projectPath: ["a/path/to/project"] }, context);
-    expect(context.logger.log).toHaveBeenCalledWith(expect.stringContaining("-k [redacted]"));
+    expect(context.logger.log).toHaveBeenCalledWith(expect.stringContaining("-k [REDACTED]"));
 
     // check that token is still in args passed to execa
     expect(execaMock).toHaveBeenCalledWith("dotnet", expect.arrayContaining(["104E4"]), { stdio: "inherit" });
