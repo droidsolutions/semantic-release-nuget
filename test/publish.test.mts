@@ -60,14 +60,14 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(2);
-    expect(execaMock.mock.calls[1]).toEqual([
+    expect(execaMock).toHaveBeenCalledTimes(3);
+    expect(execaMock.mock.calls[2]).toEqual([
       "dotnet",
       [
         "nuget",
         "push",
         "-s",
-        "https://api.nuget.org/v3/index.json",
+        "nuget",
         "-k",
         "104E4",
         expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
@@ -79,23 +79,31 @@ describe("publish", () => {
   it("should add argument for special NuGet server", async () => {
     await publish(
       {
-        nugetServer: "https://gitlab.com/mygroup/myproject",
+        nugetRegistries: [
+          {
+            name: "special",
+            url: "https://gitlab.com/mygroup/myproject",
+            type: "nuget"
+          }
+        ],
         projectPath: "RootProject.csproj",
       },
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock).toHaveBeenCalledTimes(3);
     expect(execaMock.mock.calls[1]).toEqual([
       "dotnet",
       [
         "nuget",
-        "push",
-        "-s",
+        "add",
+        "source",
         "https://gitlab.com/mygroup/myproject",
-        "-k",
+        "--name",
+        "special",
+        "--password",
         "104E4",
-        expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
+        "--store-password-in-clear-text",
       ],
       { stdio: "inherit" },
     ]);
@@ -110,14 +118,14 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(2);
-    expect(execaMock.mock.calls[1]).toEqual([
+    expect(execaMock).toHaveBeenCalledTimes(3);
+    expect(execaMock.mock.calls[2]).toEqual([
       "/usr/lib64/dotnet",
       [
         "nuget",
         "push",
         "-s",
-        "https://api.nuget.org/v3/index.json",
+        "nuget",
         "-k",
         "104E4",
         expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
@@ -206,7 +214,7 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock).toHaveBeenCalledTimes(3);
   });
 
   it("should publish to nugetServer when skipPublishToNuget is not set", async () => {
@@ -226,7 +234,7 @@ describe("publish", () => {
       context,
     );
 
-    expect(execaMock).toHaveBeenCalledTimes(2);
+    expect(execaMock).toHaveBeenCalledTimes(3);
   });
 
   it("should redact nuget token from command output", async () => {
@@ -286,11 +294,68 @@ describe("publish", () => {
         "https://gitlab.example.com/api/v4/projects/12345/packages/nuget/index.json",
         "--name",
         "gitlab",
-        "--store-password-in-clear-text",
-        "--password",
-        "104E4", // use NUGET_TOKEN when project ID is given, since CI_JOB_TOKEN can only push to the current project
         "--username",
         "deploy-user",
+        "--password",
+        "104E4", // use NUGET_TOKEN when project ID is given, since CI_JOB_TOKEN can only push to the current project
+        "--store-password-in-clear-text",
+      ],
+      { stdio: "inherit" },
+    ]);
+  });
+
+  it("should use update existing NuGet source", async () => {
+    execaMock.mockImplementationOnce(() => {
+      return {
+        stdout:
+          "Registered Sources:\n  1.  nuget [Enabled]\nhttps://api.nuget.org/v3/index.json\n",
+        exitCode: 0,
+      } as Partial<Result> as never;
+    });
+    execaMock.mockImplementationOnce(() => {
+      return {
+        command:
+          "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
+        exitCode: 0,
+      } as Partial<ResultPromise> as never;
+    });
+    execaMock.mockImplementationOnce(() => {
+      return {
+        command:
+          "dotnet nuget push -s https://gitlab.com/api/v4/projects/12345/packages/nuget/index.json -k 104E4 out/*.nupkg",
+        exitCode: 0,
+      } as Partial<ResultPromise> as never;
+    });
+
+    process.env.NUGET_TOKEN = "B00BF";
+
+    await publish(
+      {
+        nugetRegistries: [
+          {
+            "name": "nuget",
+            "url": "https://api.nuget.org/v3/index.json",
+            "type": "nuget"
+          }
+        ],
+        projectPath: "src/MyProject/MyProject.csproj",
+      },
+      context,
+    );
+
+    expect(execaMock).toHaveBeenCalledTimes(3);
+    expect(execaMock.mock.calls[1]).toEqual([
+      "dotnet",
+      [
+        "nuget",
+        "update",
+        "source",
+        "nuget",
+        "-s",
+        "https://api.nuget.org/v3/index.json",
+        "--password",
+        "B00BF", // use NUGET_TOKEN when project ID is given, since CI_JOB_TOKEN can only push to the current project
+        "--store-password-in-clear-text",
       ],
       { stdio: "inherit" },
     ]);

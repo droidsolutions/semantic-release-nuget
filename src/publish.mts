@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import SemanticReleaseError from "@semantic-release/error";
-import { execa } from "execa";
-import { join, resolve } from "path";
-import type { Config, PublishContext } from "semantic-release";
-import { extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed } from "./Helper.mjs";
-import type { NuGetSource } from "./NuGetSource.mjs";
-import type { UserConfig } from "./UserConfig.mjs";
+import {execa} from "execa";
+import {join, resolve} from "path";
+import type {Config, PublishContext} from "semantic-release";
+import {extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed} from "./Helper.mjs";
+import type {NuGetSource} from "./NuGetSource.mjs";
+import type {UserConfig} from "./UserConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
   const dotnet = pluginConfig.dotnet ?? "dotnet";
@@ -17,7 +17,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
   let sources: NuGetSource[] = [];
   try {
-    const { stdout } = await execa(dotnet, ["nuget", "list", "source"]);
+    const {stdout} = await execa(dotnet, ["nuget", "list", "source"]);
     sources = extractNugetSourcesFromListOutput(stdout);
   } catch (err) {
     context.logger.error(`Failed to list NuGet sources: ${(err as Error).message}`);
@@ -27,20 +27,22 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
     const token: string = process.env[registryConfig.tokenEnvVar!]!;
 
     try {
-      if (registryConfig.type === "nuget") {
-        const cliArgs: string[] = [...baseCliArgs, "-s", registryConfig.url!, "-k", token];
+      // if (registryConfig.type === "nuget") {
+      //   const cliArgs: string[] = [...baseCliArgs, "-s", registryConfig.url!, "-k", token];
 
-        cliArgs.push(join(packagePath, "*.nupkg"));
+      //   cliArgs.push(join(packagePath, "*.nupkg"));
 
-        const argStrings = cliArgs.join(" ");
-        context.logger.log(redactToken(`running command "${dotnet} ${argStrings}" ...`, token));
+      //   const argStrings = cliArgs.join(" ");
+      //   context.logger.log(redactToken(`running command "${dotnet} ${argStrings}" ...`, token));
 
-        await execa(dotnet, cliArgs, { stdio: "inherit" });
-        continue;
-      }
+      //   await execa(dotnet, cliArgs, {stdio: "inherit"});
+      //   continue;
+      // }
 
       const source = sources?.find((s) => s.url === registryConfig.url);
       let sourceName = registryConfig.name!;
+      let sourceAction: "add" | "update" = "add";
+      const sourceSpecificArgs: string[] = [];
 
       if (source) {
         if (source.enabled) {
@@ -48,35 +50,32 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
           sourceName = source.source;
         } else {
           context.logger.log(`Enabling the existing NuGet source ${source.source}.`);
-          await execa(dotnet, ["nuget", "enable", "source", source.source], { stdio: "inherit" });
+          await execa(dotnet, ["nuget", "enable", "source", source.source], {stdio: "inherit"});
           sourceName = source.source;
         }
+
+        sourceAction = "update";
+        sourceSpecificArgs.push(sourceName, "-s", registryConfig.url!);
       } else {
         context.logger.log(`Adding a NuGet source for ${registryConfig.url}`);
-        const sourceArgs: string[] = [
-          "nuget",
-          "add",
-          "source",
-          registryConfig.url!,
-          "--name",
-          sourceName,
-          "--store-password-in-clear-text",
-          "--password",
-          token,
-        ];
-
-        if (registryConfig.user) {
-          sourceArgs.push("--username", registryConfig.user);
-        }
-
-        await execa(dotnet, sourceArgs, { stdio: "inherit" });
+        sourceAction = "add";
+        sourceSpecificArgs.push(registryConfig.url!, "--name", sourceName);
       }
 
-      const cliArgs: string[] = [...baseCliArgs, "--source", sourceName, join(packagePath, "*.nupkg")];
+      const sourceAddOrUpdateArgs = ["nuget", sourceAction, "source", ...sourceSpecificArgs];
 
-      context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
+      if (registryConfig.user) {
+        sourceAddOrUpdateArgs.push("--username", registryConfig.user);
+      }
 
-      await execa(dotnet, cliArgs, { stdio: "inherit" });
+      sourceAddOrUpdateArgs.push("--password", token, "--store-password-in-clear-text");
+      await execa(dotnet, sourceAddOrUpdateArgs, {stdio: "inherit"});
+
+      const cliArgs: string[] = [...baseCliArgs, "-s", sourceName, "-k", token, join(packagePath, "*.nupkg")];
+
+      context.logger.log(redactToken(`running command "${dotnet} ${cliArgs.join(" ")}" ...`, token));
+
+      await execa(dotnet, cliArgs, {stdio: "inherit"});
     } catch (error) {
       const message = redactToken(`${dotnet} push failed: ${(error as Error).message}`, token);
       context.logger.error(message);
