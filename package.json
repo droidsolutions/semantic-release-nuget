@@ -42,8 +42,8 @@
     "execa": "^9.6.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "20.4.4",
-    "@commitlint/config-conventional": "20.4.4",
+    "@commitlint/cli": "20.5.0",
+    "@commitlint/config-conventional": "20.5.0",
     "@eslint/js": "10.0.1",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/error": "4.0.0",
