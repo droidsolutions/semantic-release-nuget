@@ -1,3 +1,10 @@
+# [2.1.0-beta.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.1...v2.1.0-beta.2) (2026-03-16)
+
+
+### Bug Fixes
+
+* always use source, even for default NuGet server ([5e22017](https://github.com/droidsolutions/semantic-release-nuget/commit/5e220178c649ae5f5827416a0775f4dc967af792))
+
 # [2.1.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.1...v2.1.0-beta.1) (2026-03-16)
 
 
