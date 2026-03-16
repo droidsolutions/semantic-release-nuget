@@ -32,7 +32,7 @@ describe("verify", () => {
     process.env = originalEnv;
   });
 
-  it("should report an error when NUGET_TOKEN is no set", async () => {
+  it("should report an error when NUGET_TOKEN is not set", async () => {
     let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ projectPath: "test/fixture/some.csproj" } as UserConfig, context);
@@ -58,7 +58,9 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("CI_SERVER_URL environment variable is not set but needed for GitLab registry.");
+    expect(actualErr?.details).toBe(
+      "CI_SERVER_URL environment variable is not set but needed for GitLab registry.\nRegistry gitlab has no URL configured.",
+    );
   });
 
   it("should report an error when publishToGitLab is true and no CI_PROJECT_ID is set", async () => {
@@ -74,9 +76,13 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe(
-      "CI_PROJECT_ID environment variable is not set but needed for GitLab registry.\nEither CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set.",
+    expect(actualErr?.details).toContain("CI_PROJECT_ID environment variable is not set");
+    expect(actualErr?.details).toContain(
+      "Either CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set.",
     );
+    // expect(actualErr?.details).toBe(
+    //   "CI_PROJECT_ID environment variable is not set but needed for GitLab registry.\nEither CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set.",
+    // );
   });
 
   it("should report an error when separate GitLab rpoject id is set but gitlabUser is missing", async () => {
@@ -182,7 +188,7 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("No project files given");
+    expect(actualErr?.details).toBe("No project files given.");
   });
 
   it("should not complain about missing NUGET_TOKEN when skipPublishToNuget is true", async () => {

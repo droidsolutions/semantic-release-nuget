@@ -24,9 +24,9 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
         if (!process.env.CI_PROJECT_ID) {
           errors.push(new Error("CI_PROJECT_ID environment variable is not set but needed for GitLab registry."));
         }
-      } else {
-        errors.push(new Error(`Registry ${registry.name} has no URL configured.`));
       }
+
+      errors.push(new Error(`Registry ${registry.name} has no URL configured.`));
     }
 
     if (!registry.tokenEnvVar) {
@@ -57,7 +57,7 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
     : [pluginConfig.projectPath];
 
   if (pluginConfig.projectPath.length < 1) {
-    errors.push(new Error("No project files given"));
+    errors.push(new Error("No project files given."));
   }
 
   for (const project of pluginConfig.projectPath) {
