@@ -37,8 +37,21 @@ export const extractNugetSourcesFromListOutput = (output: string): NuGetSource[]
 };
 
 export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] => {
-  if (config.registries) {
-    return config.registries;
+  if (config.registries && config.registries.length > 0) {
+    return config.registries.map((registry) => {
+      const normalized: RegistryConfig = { ...registry };
+      if (normalized.type === undefined || normalized.type === null || (normalized.type as unknown as string) === "") {
+        normalized.type = "nuget";
+      }
+      if (typeof normalized.name === "string") {
+        normalized.name = normalized.name.trim();
+      }
+      if (typeof normalized.url === "string") {
+        normalized.url = normalized.url.trim();
+      }
+
+      return normalized;
+    });
   }
 
   const registries: RegistryConfig[] = [];
