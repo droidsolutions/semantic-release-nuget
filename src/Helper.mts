@@ -18,7 +18,7 @@ export const isExecaError = (err: unknown): err is ExecaError => {
  * @returns The extracted sources.
  */
 export const extractNugetSourcesFromListOutput = (output: string): NuGetSource[] => {
-  const regex = new RegExp(/^\s+(\d+).\s+(.+)\s\[(Enabled|Disabled)\]\s+([^\s]+)$/, "gm");
+  const regex = new RegExp(/^\s+(\d+)\.\s+(.+)\s\[(Enabled|Disabled)\]\s+([^\s]+)$/, "gm");
 
   // check in each matches if one contains the given url
   let match: RegExpExecArray | null;
