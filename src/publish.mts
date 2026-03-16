@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import SemanticReleaseError from "@semantic-release/error";
-import {execa} from "execa";
-import {join, resolve} from "path";
-import type {Config, PublishContext} from "semantic-release";
-import {extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed} from "./Helper.mjs";
-import type {NuGetSource} from "./NuGetSource.mjs";
-import type {UserConfig} from "./UserConfig.mjs";
+import { execa } from "execa";
+import { join, resolve } from "path";
+import type { Config, PublishContext } from "semantic-release";
+import { extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed } from "./Helper.mjs";
+import type { NuGetSource } from "./NuGetSource.mjs";
+import type { UserConfig } from "./UserConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
   const dotnet = pluginConfig.dotnet ?? "dotnet";
@@ -17,7 +17,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
   let sources: NuGetSource[] = [];
   try {
-    const {stdout} = await execa(dotnet, ["nuget", "list", "source"]);
+    const { stdout } = await execa(dotnet, ["nuget", "list", "source"]);
     sources = extractNugetSourcesFromListOutput(stdout);
   } catch (err) {
     context.logger.error(`Failed to list NuGet sources: ${(err as Error).message}`);
@@ -50,7 +50,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
           sourceName = source.source;
         } else {
           context.logger.log(`Enabling the existing NuGet source ${source.source}.`);
-          await execa(dotnet, ["nuget", "enable", "source", source.source], {stdio: "inherit"});
+          await execa(dotnet, ["nuget", "enable", "source", source.source], { stdio: "inherit" });
           sourceName = source.source;
         }
 
@@ -69,13 +69,13 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
       }
 
       sourceAddOrUpdateArgs.push("--password", token, "--store-password-in-clear-text");
-      await execa(dotnet, sourceAddOrUpdateArgs, {stdio: "inherit"});
+      await execa(dotnet, sourceAddOrUpdateArgs, { stdio: "inherit" });
 
       const cliArgs: string[] = [...baseCliArgs, "-s", sourceName, "-k", token, join(packagePath, "*.nupkg")];
 
       context.logger.log(redactToken(`running command "${dotnet} ${cliArgs.join(" ")}" ...`, token));
 
-      await execa(dotnet, cliArgs, {stdio: "inherit"});
+      await execa(dotnet, cliArgs, { stdio: "inherit" });
     } catch (error) {
       const message = redactToken(`${dotnet} push failed: ${(error as Error).message}`, token);
       context.logger.error(message);

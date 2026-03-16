@@ -63,15 +63,7 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(3);
     expect(execaMock.mock.calls[2]).toEqual([
       "dotnet",
-      [
-        "nuget",
-        "push",
-        "-s",
-        "nuget",
-        "-k",
-        "104E4",
-        expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
-      ],
+      ["nuget", "push", "-s", "nuget", "-k", "104E4", expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/)],
       { stdio: "inherit" },
     ]);
   });
@@ -83,8 +75,8 @@ describe("publish", () => {
           {
             name: "special",
             url: "https://gitlab.com/mygroup/myproject",
-            type: "nuget"
-          }
+            type: "nuget",
+          },
         ],
         projectPath: "RootProject.csproj",
       },
@@ -121,15 +113,7 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(3);
     expect(execaMock.mock.calls[2]).toEqual([
       "/usr/lib64/dotnet",
-      [
-        "nuget",
-        "push",
-        "-s",
-        "nuget",
-        "-k",
-        "104E4",
-        expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/),
-      ],
+      ["nuget", "push", "-s", "nuget", "-k", "104E4", expect.stringMatching(/^[\w\\/-]+\/out\/\*.nupkg$/)],
       { stdio: "inherit" },
     ]);
   });
@@ -307,8 +291,7 @@ describe("publish", () => {
   it("should use update existing NuGet source", async () => {
     execaMock.mockImplementationOnce(() => {
       return {
-        stdout:
-          "Registered Sources:\n  1.  nuget [Enabled]\nhttps://api.nuget.org/v3/index.json\n",
+        stdout: "Registered Sources:\n  1.  nuget [Enabled]\nhttps://api.nuget.org/v3/index.json\n",
         exitCode: 0,
       } as Partial<Result> as never;
     });
@@ -333,10 +316,10 @@ describe("publish", () => {
       {
         nugetRegistries: [
           {
-            "name": "nuget",
-            "url": "https://api.nuget.org/v3/index.json",
-            "type": "nuget"
-          }
+            name: "nuget",
+            url: "https://api.nuget.org/v3/index.json",
+            type: "nuget",
+          },
         ],
         projectPath: "src/MyProject/MyProject.csproj",
       },
