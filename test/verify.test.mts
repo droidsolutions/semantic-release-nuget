@@ -58,9 +58,10 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe(
-      "CI_SERVER_URL environment variable is not set but needed for GitLab registry.\nRegistry gitlab has no URL configured.",
+    expect(actualErr?.details).toContain(
+      "CI_SERVER_URL environment variable is not set but needed for GitLab registry when url is not set.",
     );
+    expect(actualErr?.details).toContain("Registry gitlab has no url configured.");
   });
 
   it("should report an error when publishToGitLab is true and no CI_PROJECT_ID is set", async () => {
@@ -80,9 +81,6 @@ describe("verify", () => {
     expect(actualErr?.details).toContain(
       "Either CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set.",
     );
-    // expect(actualErr?.details).toBe(
-    //   "CI_PROJECT_ID environment variable is not set but needed for GitLab registry.\nEither CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set.",
-    // );
   });
 
   it("should report an error when separate GitLab rpoject id is set but gitlabUser is missing", async () => {
@@ -238,6 +236,26 @@ describe("verify", () => {
 
     expect(actualErr).toBeDefined();
     expect(actualErr?.details).toBe("Environment variable MY_TOKEN for registry my-registry is not set.");
+  });
+
+  it("should report an error when no URL is set and GitLab CI env vars are missing", async () => {
+    delete process.env.CI_SERVER_URL;
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [{ name: "gitlab-registry", type: "gitlab" }],
+    } as UserConfig;
+
+    let actuallErr: SemanticReleaseError | undefined;
+    try {
+      await verify(config, context);
+    } catch (err) {
+      actuallErr = err as SemanticReleaseError;
+    }
+
+    expect(actuallErr).toBeDefined();
+    expect(actuallErr?.details).toContain(
+      "CI_SERVER_URL environment variable is not set but needed for GitLab registry when url is not set.",
+    );
   });
 
   it("should resolve environment variables in GitLab registry configuration", async () => {

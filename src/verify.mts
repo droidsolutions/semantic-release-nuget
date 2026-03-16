@@ -19,7 +19,11 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
     if (!registry.url) {
       if (registry.type === "gitlab") {
         if (!process.env.CI_SERVER_URL) {
-          errors.push(new Error("CI_SERVER_URL environment variable is not set but needed for GitLab registry."));
+          errors.push(
+            new Error(
+              "CI_SERVER_URL environment variable is not set but needed for GitLab registry when url is not set.",
+            ),
+          );
         }
         if (!process.env.CI_PROJECT_ID) {
           errors.push(new Error("CI_PROJECT_ID environment variable is not set but needed for GitLab registry."));
@@ -32,7 +36,7 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
         }
       }
 
-      errors.push(new Error(`Registry ${registry.name} has no URL configured.`));
+      errors.push(new Error(`Registry ${registry.name} has no url configured.`));
     }
 
     if (registry.type === "github" && !registry.user) {
