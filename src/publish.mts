@@ -53,11 +53,11 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
         }
       } else {
         context.logger.log(`Adding a NuGet source for ${registryConfig.url}`);
-        const sourceArgs = [
+        const sourceArgs: string[] = [
           "nuget",
           "add",
           "source",
-          registryConfig.url,
+          registryConfig.url!,
           "--name",
           sourceName,
           "--store-password-in-clear-text",
@@ -72,7 +72,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
         await execa(dotnet, sourceArgs, { stdio: "inherit" });
       }
 
-      const cliArgs = [...baseCliArgs, "--source", sourceName, join(packagePath, "*.nupkg")];
+      const cliArgs: string[] = [...baseCliArgs, "--source", sourceName, join(packagePath, "*.nupkg")];
 
       context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
 

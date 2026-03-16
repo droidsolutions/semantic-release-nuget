@@ -257,4 +257,64 @@ describe("verify", () => {
 
     await expect(verify(config, context)).resolves.toBeUndefined();
   });
+
+  it("should report an error when GitHub registry is configured but no GITHUB_REPOSITORY_OWNER is set", async () => {
+    delete process.env.GITHUB_REPOSITORY_OWNER;
+    process.env.GITHUB_TOKEN = "104E2";
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify(
+        {
+          projectPath: "test/fixture/some.csproj",
+          nugetRegistries: [{ type: "github" }],
+        } as UserConfig,
+        context,
+      );
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toContain(
+      "GITHUB_REPOSITORY_OWNER environment variable is not set but needed for GitHub registry.",
+    );
+  });
+
+  it("should report an error when GitHub registry is configured but no GITHUB_ACTOR is set and no user provided", async () => {
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+    process.env.GITHUB_TOKEN = "104E2";
+    delete process.env.GITHUB_ACTOR;
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify(
+        {
+          projectPath: "test/fixture/some.csproj",
+          nugetRegistries: [{ type: "github" }],
+        } as UserConfig,
+        context,
+      );
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toContain(
+      "GITHUB_ACTOR environment variable is not set but needed for GitHub registry.",
+    );
+  });
+
+  it("should verify successfully when GitHub registry is configured with all environment variables", async () => {
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+    process.env.GITHUB_TOKEN = "104E2";
+    process.env.GITHUB_ACTOR = "somebody";
+
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [{ type: "github" }],
+    } as UserConfig;
+
+    await expect(verify(config, context)).resolves.toBeUndefined();
+  });
 });

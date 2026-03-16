@@ -127,4 +127,57 @@ describe("normalizeRegistryConfig", () => {
       },
     ]);
   });
+
+  it("should resolve default GitHub config from environment variables", () => {
+    const config = {
+      ...emptyConfig,
+      nugetRegistries: [
+        {
+          type: "github",
+        },
+      ],
+    } as UserConfig;
+
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+    process.env.GITHUB_ACTOR = "somebody";
+
+    const result = normalizeRegistryConfig(config);
+
+    expect(result).toEqual([
+      {
+        name: "github",
+        type: "github",
+        tokenEnvVar: "GITHUB_TOKEN",
+        url: "https://nuget.pkg.github.com/droidsolutions/index.json",
+        user: "somebody",
+      },
+    ]);
+  });
+
+  it("should not override any fields for GitHub type that are already set", () => {
+    const config = {
+      ...emptyConfig,
+      nugetRegistries: [
+        {
+          name: "my-github",
+          tokenEnvVar: "MY_TOKEN",
+          url: "https://nuget.pkg.github.com/other/index.json",
+          type: "github",
+          user: "other-user",
+        },
+      ],
+    } as UserConfig;
+
+    const result = normalizeRegistryConfig(config);
+
+    expect(result).toEqual([
+      {
+        name: "my-github",
+        type: "github",
+        tokenEnvVar: "MY_TOKEN",
+        url: "https://nuget.pkg.github.com/other/index.json",
+        user: "other-user",
+      },
+    ]);
+  });
 });

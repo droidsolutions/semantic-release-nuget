@@ -65,7 +65,7 @@ The NuGet server authentication is **required** and can be set via [environment 
 | Options                         | Description                                                                                                                                                                                                                    | Default                                     |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
 | `nugetRegistries`               | A list of NuGet registry configurations to publish to.                                                                                                                                                                         | see below                                   |
-| `nugetRegistries[].type`        | The type of the NuGet registry. Possible values are `nuget`, `gitlab`.                                                                                                                                                         | `nuget`                                     |
+| `nugetRegistries[].type`        | The type of the NuGet registry. Possible values are `nuget`, `gitlab`, `github`.                                                                                                                                               | `nuget`                                     |
 | `nugetRegistries[].name`        | Name of the source for logging and recognation from nuget.config.                                                                                                                                                              | `nuget`                                     |
 | `nugetRegistries[].url`         | The URL to the NuGet registry.                                                                                                                                                                                                 | `https://api.nuget.org/v3/index.json`       |
 | `nugetRegistries[].user`        | The user to login to the NuGet registry.                                                                                                                                                                                       |                                             |
@@ -179,6 +179,24 @@ If you want to publish to a different GitLab project you probably need a GitLab 
 
 This will resolve the GitLab registry url from variables that are set in the GitLab CI:
 `${CI_SERVER_URL}/api/v4/projects/123/packages/nuget/index.json`. It will set `tokenEnvVar` to `NUGET_TOKEN` which is sufficient to publish packages to the current project. You can also set `tokenEnvVar` yourself if you want to use a different environment variable.
+
+### Publish to GitHub Packages
+
+To publish to GitHub Packages you can use the `github` type.
+
+```json
+{
+  "nugetRegistries": [
+    {
+      "type": "github"
+    }
+  ]
+}
+```
+
+This will automatically resolve the registry URL to `https://nuget.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/index.json`.
+It will use `GITHUB_TOKEN` environment variable for authentication and `GITHUB_ACTOR` as username.
+Make sure your workflow has `packages: write` permission.
 
 ### Publish to multiple registries
 

@@ -24,9 +24,21 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
         if (!process.env.CI_PROJECT_ID) {
           errors.push(new Error("CI_PROJECT_ID environment variable is not set but needed for GitLab registry."));
         }
+      } else if (registry.type === "github") {
+        if (!process.env.GITHUB_REPOSITORY_OWNER) {
+          errors.push(
+            new Error("GITHUB_REPOSITORY_OWNER environment variable is not set but needed for GitHub registry."),
+          );
+        }
       }
 
       errors.push(new Error(`Registry ${registry.name} has no URL configured.`));
+    }
+
+    if (registry.type === "github" && !registry.user) {
+      if (!process.env.GITHUB_ACTOR) {
+        errors.push(new Error("GITHUB_ACTOR environment variable is not set but needed for GitHub registry."));
+      }
     }
 
     if (!registry.tokenEnvVar) {
