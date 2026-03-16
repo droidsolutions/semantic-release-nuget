@@ -69,7 +69,10 @@ export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] =>
 
         normalized.name ??= "gitlab";
         normalized.tokenEnvVar ??= defaultEnvVar;
-        normalized.url ??= `${process.env.CI_SERVER_URL}/api/v4/projects/${projectId}/packages/nuget/index.json`;
+        if (!normalized.url && process.env.CI_SERVER_URL && projectId) {
+          normalized.url = `${process.env.CI_SERVER_URL}/api/v4/projects/${projectId}/packages/nuget/index.json`;
+        }
+        normalized.user ??= config.gitlabUser ?? "gitlab-ci-token";
       } else if (normalized.type === "github") {
         normalized.name ??= "github";
         normalized.tokenEnvVar ??= "GITHUB_TOKEN";

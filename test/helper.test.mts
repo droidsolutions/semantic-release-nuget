@@ -11,7 +11,7 @@ describe("normalizeRegistryConfig", () => {
     originalEnv = { ...process.env };
   });
 
-  afterAll(() => {
+  afterEach(() => {
     process.env = originalEnv;
   });
 
@@ -72,6 +72,7 @@ describe("normalizeRegistryConfig", () => {
         type: "gitlab",
         tokenEnvVar: "CI_JOB_TOKEN",
         url: "https://gitlab.example.com/api/v4/projects/132/packages/nuget/index.json",
+        user: "gitlab-ci-token",
       },
     ]);
   });
@@ -97,6 +98,7 @@ describe("normalizeRegistryConfig", () => {
         type: "gitlab",
         tokenEnvVar: "NUGET_TOKEN",
         url: "https://custom.gitlab.com/nuget/index.json",
+        user: "gitlab-ci-token",
       },
     ]);
   });
@@ -124,6 +126,35 @@ describe("normalizeRegistryConfig", () => {
         type: "gitlab",
         tokenEnvVar: "NUGET_TOKEN",
         url: "https://gitlab.example.com/api/v4/projects/456/packages/nuget/index.json",
+        user: "gitlab-ci-token",
+      },
+    ]);
+  });
+
+  it("should resolve user from config.gitlabUser when config is type gitlab", () => {
+    const config = {
+      ...emptyConfig,
+      gitlabRegistryProjectId: 456,
+      gitlabUser: "custom-gitlab-user",
+      nugetRegistries: [
+        {
+          type: "gitlab",
+        },
+      ],
+    } as UserConfig;
+
+    process.env.CI_SERVER_URL = "https://gitlab.example.com";
+    process.env.CI_PROJECT_ID = "132";
+
+    const result = normalizeRegistryConfig(config);
+
+    expect(result).toEqual([
+      {
+        name: "gitlab",
+        type: "gitlab",
+        tokenEnvVar: "NUGET_TOKEN",
+        url: "https://gitlab.example.com/api/v4/projects/456/packages/nuget/index.json",
+        user: "custom-gitlab-user",
       },
     ]);
   });
