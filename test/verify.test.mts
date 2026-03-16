@@ -15,7 +15,7 @@ describe("verify", () => {
   let verify: (pluginConfig: UserConfig, _context: VerifyConditionsContext) => Promise<void>;
 
   beforeAll(async () => {
-    originalEnv = process.env;
+    originalEnv = { ...process.env };
     const logMock = jest.fn();
     context = {
       branch: { name: "main" },
@@ -32,7 +32,7 @@ describe("verify", () => {
     process.env = originalEnv;
   });
 
-  it("should report an error when NUGET_TOKEN is no set", async () => {
+  it("should report an error when NUGET_TOKEN is not set", async () => {
     let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ projectPath: "test/fixture/some.csproj" } as UserConfig, context);
@@ -41,7 +41,7 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("Environment variable NUGET_TOKEN is not set.");
+    expect(actualErr?.details).toBe("Environment variable NUGET_TOKEN for registry nuget is not set.");
   });
 
   it("should report an error when publishToGitLab is true and no CI_SERVER_URL is set", async () => {
@@ -58,7 +58,10 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("GitLab environment variable CI_SERVER_URL is not set.");
+    expect(actualErr?.details).toContain(
+      "CI_SERVER_URL environment variable is not set but needed for GitLab registry when url is not set.",
+    );
+    expect(actualErr?.details).toContain("Registry gitlab has no url configured.");
   });
 
   it("should report an error when publishToGitLab is true and no CI_PROJECT_ID is set", async () => {
@@ -74,7 +77,8 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe(
+    expect(actualErr?.details).toContain("CI_PROJECT_ID environment variable is not set");
+    expect(actualErr?.details).toContain(
       "Either CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set.",
     );
   });
@@ -112,7 +116,7 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("GitLab environment variable CI_JOB_TOKEN is not set.");
+    expect(actualErr?.details).toBe("Environment variable CI_JOB_TOKEN for registry gitlab is not set.");
   });
 
   it("should report an error when publishToGitlab is false and skipPublishToNuget is true", async () => {
@@ -129,9 +133,7 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe(
-      "skipPublishToNuget is set to true, but publishToGitLab is not set to true so the package will not be published anywhere.",
-    );
+    expect(actualErr?.details).toBe("No NuGet registries configured to publish to.");
   });
 
   it("should report an error if path to non existing project file is given", async () => {
@@ -184,7 +186,7 @@ describe("verify", () => {
     }
 
     expect(actualErr).toBeDefined();
-    expect(actualErr?.details).toBe("No project files given");
+    expect(actualErr?.details).toBe("No project files given.");
   });
 
   it("should not complain about missing NUGET_TOKEN when skipPublishToNuget is true", async () => {
@@ -199,5 +201,138 @@ describe("verify", () => {
     );
 
     await expect(promise).resolves.toBeUndefined();
+  });
+
+  it("should report an error when a registry has no tokenEnvVar configured and NUGET_TOKEN is not set", async () => {
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [{ name: "my-registry", url: "https://example.com" }],
+    } as UserConfig;
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify(config, context);
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toBe("Environment variable NUGET_TOKEN for registry my-registry is not set.");
+  });
+
+  it("should report an error when the token environment variable for a registry is not set", async () => {
+    delete process.env.MY_TOKEN;
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [{ name: "my-registry", url: "https://example.com", tokenEnvVar: "MY_TOKEN" }],
+    } as UserConfig;
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify(config, context);
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toBe("Environment variable MY_TOKEN for registry my-registry is not set.");
+  });
+
+  it("should report an error when no URL is set and GitLab CI env vars are missing", async () => {
+    delete process.env.CI_SERVER_URL;
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [{ name: "gitlab-registry", type: "gitlab" }],
+    } as UserConfig;
+
+    let actuallErr: SemanticReleaseError | undefined;
+    try {
+      await verify(config, context);
+    } catch (err) {
+      actuallErr = err as SemanticReleaseError;
+    }
+
+    expect(actuallErr).toBeDefined();
+    expect(actuallErr?.details).toContain(
+      "CI_SERVER_URL environment variable is not set but needed for GitLab registry when url is not set.",
+    );
+  });
+
+  it("should resolve environment variables in GitLab registry configuration", async () => {
+    process.env.CI_SERVER_URL = "https://gitlab.example.com";
+    process.env.CI_PROJECT_ID = "132";
+    process.env.CI_JOB_TOKEN = "a3lhjli";
+
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [
+        {
+          name: "gitlab",
+          type: "gitlab",
+        },
+      ],
+    } as UserConfig;
+
+    await expect(verify(config, context)).resolves.toBeUndefined();
+  });
+
+  it("should report an error when GitHub registry is configured but no GITHUB_REPOSITORY_OWNER is set", async () => {
+    delete process.env.GITHUB_REPOSITORY_OWNER;
+    process.env.GITHUB_TOKEN = "104E2";
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify(
+        {
+          projectPath: "test/fixture/some.csproj",
+          nugetRegistries: [{ type: "github" }],
+        } as UserConfig,
+        context,
+      );
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toContain(
+      "GITHUB_REPOSITORY_OWNER environment variable is not set but needed for GitHub registry.",
+    );
+  });
+
+  it("should report an error when GitHub registry is configured but no GITHUB_ACTOR is set and no user provided", async () => {
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+    process.env.GITHUB_TOKEN = "104E2";
+    delete process.env.GITHUB_ACTOR;
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify(
+        {
+          projectPath: "test/fixture/some.csproj",
+          nugetRegistries: [{ type: "github" }],
+        } as UserConfig,
+        context,
+      );
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toContain(
+      "GITHUB_ACTOR environment variable is not set but needed for GitHub registry.",
+    );
+  });
+
+  it("should verify successfully when GitHub registry is configured with all environment variables", async () => {
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+    process.env.GITHUB_TOKEN = "104E2";
+    process.env.GITHUB_ACTOR = "somebody";
+
+    const config = {
+      projectPath: "test/fixture/some.csproj",
+      nugetRegistries: [{ type: "github" }],
+    } as UserConfig;
+
+    await expect(verify(config, context)).resolves.toBeUndefined();
   });
 });

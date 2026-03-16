@@ -2,22 +2,67 @@ import SRError from "@semantic-release/error";
 import { execa } from "execa";
 import { promises } from "fs";
 import { resolve } from "path";
-import { Config, VerifyConditionsContext } from "semantic-release";
-import { UserConfig } from "./UserConfig.mjs";
+import type { Config, VerifyConditionsContext } from "semantic-release";
+import { normalizeRegistryConfig } from "./Helper.mjs";
+import type { UserConfig } from "./UserConfig.mjs";
 
 export const verify = async (pluginConfig: Config & UserConfig, _context: VerifyConditionsContext): Promise<void> => {
   const errors: Error[] = [];
-  if (!pluginConfig.skipPublishToNuget && !process.env["NUGET_TOKEN"]) {
-    errors.push(new Error("Environment variable NUGET_TOKEN is not set."));
+
+  const registries = normalizeRegistryConfig(pluginConfig);
+
+  if (registries.length === 0) {
+    errors.push(new Error("No NuGet registries configured to publish to."));
   }
 
-  if (pluginConfig.publishToGitLab) {
-    for (const envVar of ["CI_SERVER_URL", "CI_JOB_TOKEN"]) {
-      if (!process.env[envVar]) {
-        errors.push(new Error(`GitLab environment variable ${envVar} is not set.`));
+  for (const registry of registries) {
+    if (!registry.url) {
+      if (registry.type === "gitlab") {
+        if (!process.env.CI_SERVER_URL) {
+          errors.push(
+            new Error(
+              "CI_SERVER_URL environment variable is not set but needed for GitLab registry when url is not set.",
+            ),
+          );
+        }
+        if (!process.env.CI_PROJECT_ID) {
+          errors.push(new Error("CI_PROJECT_ID environment variable is not set but needed for GitLab registry."));
+        }
+      } else if (registry.type === "github") {
+        if (!process.env.GITHUB_REPOSITORY_OWNER) {
+          errors.push(
+            new Error("GITHUB_REPOSITORY_OWNER environment variable is not set but needed for GitHub registry."),
+          );
+        }
+      }
+
+      errors.push(new Error(`Registry ${registry.name} has no url configured.`));
+    }
+
+    if (registry.type === "github" && !registry.user) {
+      if (!process.env.GITHUB_ACTOR) {
+        errors.push(new Error("GITHUB_ACTOR environment variable is not set but needed for GitHub registry."));
       }
     }
 
+    if (!registry.tokenEnvVar) {
+      if (registry.type === "gitlab") {
+        if (!process.env.CI_JOB_TOKEN && !process.env.NUGET_TOKEN) {
+          errors.push(new Error("Environment variable CI_JOB_TOKEN or NUGET_TOKEN must be set for GitLab registry."));
+        }
+      } else if (!process.env.NUGET_TOKEN) {
+        errors.push(
+          new Error(
+            `Registry ${registry.name} has no token environment variable configured and NUGET_TOKEN is not set.`,
+          ),
+        );
+      }
+    } else if (!process.env[registry.tokenEnvVar]) {
+      errors.push(new Error(`Environment variable ${registry.tokenEnvVar} for registry ${registry.name} is not set.`));
+    }
+  }
+
+  if (pluginConfig.publishToGitLab) {
     if (!pluginConfig.gitlabRegistryProjectId && !process.env["CI_PROJECT_ID"]) {
       errors.push(new Error("Either CI_PROJECT_ID environment variable or gitlabRegistryProjectId must be set."));
     }
@@ -25,12 +70,6 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
     if (pluginConfig.gitlabRegistryProjectId && !pluginConfig.gitlabUser) {
       errors.push(new Error("When a separate GitLab project ID is set, gitlabUser must also be set."));
     }
-  } else if (pluginConfig.skipPublishToNuget) {
-    errors.push(
-      new Error(
-        "skipPublishToNuget is set to true, but publishToGitLab is not set to true so the package will not be published anywhere.",
-      ),
-    );
   }
 
   pluginConfig.projectPath = Array.isArray(pluginConfig.projectPath)
@@ -38,7 +77,7 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
     : [pluginConfig.projectPath];
 
   if (pluginConfig.projectPath.length < 1) {
-    errors.push(new Error("No project files given"));
+    errors.push(new Error("No project files given."));
   }
 
   for (const project of pluginConfig.projectPath) {

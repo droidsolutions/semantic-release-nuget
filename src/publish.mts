@@ -2,109 +2,100 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
-import { resolve, sep } from "path";
-import { Config, PublishContext } from "semantic-release";
-import { isExecaError, publishFailed } from "./Helper.mjs";
-import { UserConfig } from "./UserConfig.mjs";
+import { join, resolve } from "path";
+import type { Config, PublishContext } from "semantic-release";
+import { extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed } from "./Helper.mjs";
+import type { NuGetSource } from "./NuGetSource.mjs";
+import type { UserConfig } from "./UserConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
   const dotnet = pluginConfig.dotnet ?? "dotnet";
-  const registry = pluginConfig.nugetServer ?? "https://api.nuget.org/v3/index.json";
   const packagePath = resolve("out");
   const baseCliArgs: string[] = ["nuget", "push"];
-  const token: string = process.env.NUGET_TOKEN!;
 
-  if (pluginConfig.skipPublishToNuget) {
-    context.logger.log("Skipping publish to NuGet server because skipPublishToNuget is set to true.");
-  } else {
+  const registries = normalizeRegistryConfig(pluginConfig);
+
+  let sources: NuGetSource[] = [];
+  try {
+    const { stdout } = await execa(dotnet, ["nuget", "list", "source"]);
+    sources = extractNugetSourcesFromListOutput(stdout);
+  } catch (err) {
+    context.logger.error(`Failed to list NuGet sources: ${(err as Error).message}`);
+  }
+
+  for (const registryConfig of registries) {
+    const token: string = process.env[registryConfig.tokenEnvVar!]!;
+
     try {
-      const cliArgs = [...baseCliArgs, "-s", registry, "-k", token];
+      if (registryConfig.type === "nuget") {
+        const cliArgs: string[] = [...baseCliArgs, "-s", registryConfig.url!, "-k", token];
 
-      cliArgs.push(`${packagePath}${sep}*.nupkg`);
+        cliArgs.push(join(packagePath, "*.nupkg"));
 
-      const argStrings = cliArgs.map((value) => (value === token ? "[redacted]" : value)).join(" ");
-      context.logger.log(`running command "${dotnet} ${argStrings}" ...`);
+        const argStrings = cliArgs.join(" ");
+        context.logger.log(redactToken(`running command "${dotnet} ${argStrings}" ...`, token));
+
+        await execa(dotnet, cliArgs, { stdio: "inherit" });
+        continue;
+      }
+
+      const source = sources?.find((s) => s.url === registryConfig.url);
+      let sourceName = registryConfig.name!;
+
+      if (source) {
+        if (source.enabled) {
+          context.logger.log(`A NuGet source with the needed url already exists, using source ${source.source}.`);
+          sourceName = source.source;
+        } else {
+          context.logger.log(`Enabling the existing NuGet source ${source.source}.`);
+          await execa(dotnet, ["nuget", "enable", "source", source.source], { stdio: "inherit" });
+          sourceName = source.source;
+        }
+      } else {
+        context.logger.log(`Adding a NuGet source for ${registryConfig.url}`);
+        const sourceArgs: string[] = [
+          "nuget",
+          "add",
+          "source",
+          registryConfig.url!,
+          "--name",
+          sourceName,
+          "--store-password-in-clear-text",
+          "--password",
+          token,
+        ];
+
+        if (registryConfig.user) {
+          sourceArgs.push("--username", registryConfig.user);
+        }
+
+        await execa(dotnet, sourceArgs, { stdio: "inherit" });
+      }
+
+      const cliArgs: string[] = [...baseCliArgs, "--source", sourceName, join(packagePath, "*.nupkg")];
+
+      context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
 
       await execa(dotnet, cliArgs, { stdio: "inherit" });
     } catch (error) {
-      context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
+      const message = redactToken(`${dotnet} push failed: ${(error as Error).message}`, token);
+      context.logger.error(message);
 
       if (isExecaError(error)) {
-        let description = error.command;
-
-        // hide token from SR output
-        if (error.command?.includes(token)) {
-          description = description.replace(token, "[redacted]");
-        }
+        const description = redactToken(error.command, token);
 
         throw new SemanticReleaseError(
-          `publish to registry ${registry} failed with exit code ${error.exitCode}`,
+          `publish to registry ${registryConfig.url} failed with exit code ${error.exitCode}`,
           publishFailed,
           description,
         );
       }
 
-      throw new SemanticReleaseError(`publish to registry ${registry} failed`, publishFailed, (error as Error).message);
+      throw new SemanticReleaseError(`publish to registry ${registryConfig.url} failed`, publishFailed, message);
     }
   }
+};
 
-  if (pluginConfig.publishToGitLab !== true) {
-    return;
-  }
-
-  try {
-    let projectId = parseInt(process.env.CI_PROJECT_ID!, 10);
-    let gitlabToken = process.env.CI_JOB_TOKEN!;
-    let gitlabUser = "gitlab-ci-token";
-
-    if (pluginConfig.gitlabRegistryProjectId) {
-      projectId = pluginConfig.gitlabRegistryProjectId;
-      gitlabToken = token;
-      gitlabUser = pluginConfig.gitlabUser!;
-    }
-
-    const url = `${process.env.CI_SERVER_URL!}/api/v4/projects/${projectId}/packages/nuget/index.json`;
-
-    // Check if there is already a NuGet source with the GitLab url before adding it
-    const { stdout } = await execa(dotnet, ["nuget", "list", "source", "--format", "short"]);
-    if (stdout?.includes(url) === true) {
-      context.logger.log(`GitLab NuGet source ${url} already exists, skip adding`);
-    } else {
-      context.logger.log(`Adding GitLab as NuGet source ${url}`);
-      await execa(
-        dotnet,
-        [
-          "nuget",
-          "add",
-          "source",
-          url,
-          "--name",
-          "gitlab",
-          "--username",
-          gitlabUser,
-          "--password",
-          gitlabToken,
-          "--store-password-in-clear-text",
-        ],
-        { stdio: "inherit" },
-      );
-    }
-
-    const cliArgs = [...baseCliArgs, "--source", "gitlab", `${packagePath}/*.nupkg`];
-
-    context.logger.log(`running command "${dotnet} ${cliArgs.join(" ")}" ...`);
-
-    await execa(dotnet, cliArgs, { stdio: "inherit" });
-  } catch (error) {
-    context.logger.error(`${dotnet} push failed: ${(error as Error).message}`);
-    if (isExecaError(error)) {
-      throw new SemanticReleaseError(
-        `publish to GitLab failed with exit code ${error.exitCode}`,
-        publishFailed,
-        error.command,
-      );
-    }
-
-    throw new SemanticReleaseError("publish to GitLab failed", publishFailed, (error as Error).message);
-  }
+const redactToken = (message: string, token: string): string => {
+  return message.replaceAll(token, "[REDACTED]");
 };
