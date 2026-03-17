@@ -1,3 +1,10 @@
+# [2.1.0-beta.3](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2026-03-17)
+
+
+### Bug Fixes
+
+* use gitlab_private instead of gitlab for type ([3fdc174](https://github.com/droidsolutions/semantic-release-nuget/commit/3fdc1746a370829beb860721509b97a8824618cb))
+
 # [2.1.0-beta.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.1...v2.1.0-beta.2) (2026-03-16)
 
 
