@@ -56,7 +56,7 @@ describe("normalizeRegistryConfig", () => {
       ...emptyConfig,
       nugetRegistries: [
         {
-          type: "gitlab",
+          type: "gitlab_private",
         },
       ],
     } as UserConfig;
@@ -69,7 +69,7 @@ describe("normalizeRegistryConfig", () => {
     expect(result).toEqual([
       {
         name: "gitlab",
-        type: "gitlab",
+        type: "gitlab_private",
         tokenEnvVar: "CI_JOB_TOKEN",
         url: "https://gitlab.example.com/api/v4/projects/132/packages/nuget/index.json",
         user: "gitlab-ci-token",
@@ -85,7 +85,7 @@ describe("normalizeRegistryConfig", () => {
           name: "my-gitlab",
           tokenEnvVar: "NUGET_TOKEN",
           url: "https://custom.gitlab.com/nuget/index.json",
-          type: "gitlab",
+          type: "gitlab_private",
         },
       ],
     } as UserConfig;
@@ -95,7 +95,7 @@ describe("normalizeRegistryConfig", () => {
     expect(result).toEqual([
       {
         name: "my-gitlab",
-        type: "gitlab",
+        type: "gitlab_private",
         tokenEnvVar: "NUGET_TOKEN",
         url: "https://custom.gitlab.com/nuget/index.json",
         user: "gitlab-ci-token",
@@ -110,7 +110,7 @@ describe("normalizeRegistryConfig", () => {
       nugetRegistries: [
         {
           name: "special-gitlab",
-          type: "gitlab",
+          type: "gitlab_private",
         },
       ],
     } as UserConfig;
@@ -123,7 +123,7 @@ describe("normalizeRegistryConfig", () => {
     expect(result).toEqual([
       {
         name: "special-gitlab", // should not overwrite name if given
-        type: "gitlab",
+        type: "gitlab_private",
         tokenEnvVar: "NUGET_TOKEN",
         url: "https://gitlab.example.com/api/v4/projects/456/packages/nuget/index.json",
         user: "gitlab-ci-token",
@@ -131,14 +131,14 @@ describe("normalizeRegistryConfig", () => {
     ]);
   });
 
-  it("should resolve user from config.gitlabUser when config is type gitlab", () => {
+  it("should resolve user from config.gitlabUser when config is type gitlab_private", () => {
     const config = {
       ...emptyConfig,
       gitlabRegistryProjectId: 456,
       gitlabUser: "custom-gitlab-user",
       nugetRegistries: [
         {
-          type: "gitlab",
+          type: "gitlab_private",
         },
       ],
     } as UserConfig;
@@ -151,7 +151,7 @@ describe("normalizeRegistryConfig", () => {
     expect(result).toEqual([
       {
         name: "gitlab",
-        type: "gitlab",
+        type: "gitlab_private",
         tokenEnvVar: "NUGET_TOKEN",
         url: "https://gitlab.example.com/api/v4/projects/456/packages/nuget/index.json",
         user: "custom-gitlab-user",

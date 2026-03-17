@@ -17,7 +17,7 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
 
   for (const registry of registries) {
     if (!registry.url) {
-      if (registry.type === "gitlab") {
+      if (registry.type === "gitlab_private") {
         if (!process.env.CI_SERVER_URL) {
           errors.push(
             new Error(
@@ -46,7 +46,7 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
     }
 
     if (!registry.tokenEnvVar) {
-      if (registry.type === "gitlab") {
+      if (registry.type === "gitlab_private") {
         if (!process.env.CI_JOB_TOKEN && !process.env.NUGET_TOKEN) {
           errors.push(new Error("Environment variable CI_JOB_TOKEN or NUGET_TOKEN must be set for GitLab registry."));
         }

@@ -57,7 +57,7 @@ export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] =>
         normalized.name ??= "nuget";
         normalized.url ??= "https://api.nuget.org/v3/index.json";
         normalized.tokenEnvVar ??= "NUGET_TOKEN";
-      } else if (normalized.type === "gitlab") {
+      } else if (normalized.type === "gitlab_private") {
         // resolve url from env vars
         let projectId = process.env.CI_PROJECT_ID;
         let defaultEnvVar = "CI_JOB_TOKEN";
@@ -120,7 +120,7 @@ export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] =>
       url,
       tokenEnvVar: config.gitlabRegistryProjectId ? "NUGET_TOKEN" : "CI_JOB_TOKEN",
       user: config.gitlabRegistryProjectId ? config.gitlabUser : (config.gitlabUser ?? "gitlab-ci-token"),
-      type: "gitlab",
+      type: "gitlab_private",
     });
   }
 

@@ -242,7 +242,7 @@ describe("verify", () => {
     delete process.env.CI_SERVER_URL;
     const config = {
       projectPath: "test/fixture/some.csproj",
-      nugetRegistries: [{ name: "gitlab-registry", type: "gitlab" }],
+      nugetRegistries: [{ name: "gitlab-registry", type: "gitlab_private" }],
     } as UserConfig;
 
     let actuallErr: SemanticReleaseError | undefined;
@@ -268,7 +268,7 @@ describe("verify", () => {
       nugetRegistries: [
         {
           name: "gitlab",
-          type: "gitlab",
+          type: "gitlab_private",
         },
       ],
     } as UserConfig;

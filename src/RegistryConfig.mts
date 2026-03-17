@@ -28,5 +28,5 @@ export interface RegistryConfig {
    * The type of the registry, used to determine the command arguments to use when pushing to it.
    * If not set, "nuget" will be used as default.
    */
-  type: "nuget" | "gitlab" | "github" | "generic";
+  type: "nuget" | "gitlab_private" | "github" | "generic";
 }
