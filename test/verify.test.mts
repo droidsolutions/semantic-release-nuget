@@ -3,7 +3,6 @@ import type SemanticReleaseError from "@semantic-release/error";
 import type { execa as execaType, ResultPromise } from "execa";
 import type { VerifyConditionsContext } from "semantic-release";
 import type { UserConfig } from "../src/UserConfig.mjs";
-import { Readable } from "node:stream";
 
 jest.unstable_mockModule("execa", () => ({
   execa: jest.fn(),
