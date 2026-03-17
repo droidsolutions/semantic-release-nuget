@@ -1,16 +1,29 @@
 import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
+import { readdir } from "node:fs/promises";
 import { join, resolve } from "path";
-import type { Config, PublishContext, VerifyReleaseContext } from "semantic-release";
+import type { Config, PublishContext, Release, VerifyReleaseContext } from "semantic-release";
 import { extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed } from "./Helper.mjs";
 import type { NuGetSource } from "./NuGetSource.mjs";
-import type { UserConfig } from "./UserConfig.mjs";
 import { RegistryConfig } from "./RegistryConfig.mjs";
+import type { UserConfig } from "./UserConfig.mjs";
 
-export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
+export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<Release | void> => {
   const dotnet = pluginConfig.dotnet ?? "dotnet";
   const packagePath = resolve("out");
   const baseCliArgs: string[] = ["nuget", "push"];
+
+  const packageId = await getFirstPackageNameAync(packagePath, context.nextRelease.version);
+
+  const release: Release = {
+    gitHead: context.nextRelease.gitHead,
+    gitTag: context.nextRelease.gitTag,
+    name: packageId,
+    notes: context.nextRelease.notes ?? "NuGet package",
+    type: context.nextRelease.type,
+    version: context.nextRelease.version,
+    pluginName: "@droidsolutions-oss/semantic-release-nuget",
+  };
 
   const registries = normalizeRegistryConfig(pluginConfig);
 
@@ -36,6 +49,19 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
       context.logger.log(redactToken(`running command "${dotnet} ${cliArgs.join(" ")}" ...`, token));
 
       await execa(dotnet, cliArgs, { stdio: "inherit" });
+
+      if (registryConfig.type === "nuget") {
+        // For NuGet.org we can determine the release URL.
+        release.url = `https://www.nuget.org/packages/${packageId}/${context.nextRelease.version}`;
+      }
+
+      if (registryConfig.type === "github" && release.url === undefined) {
+        // If we don't already have a NuGet package, we can use the GitHub package if there is one.
+        // Unfortunately GitHub package links have an arbitrary ID, so we can only link to the general package page.
+        // This is something like <orga>/<repo>/pkgs/nuget/<packageId>.
+        // Example: https://github.com/droidsolutions/semantic-version/pkgs/nuget/DroidSolutions.Oss.SemanticVersion
+        release.url = `https://github.com/${context.env.GITHUB_REPOSITORY_OWNER}/${context.env.GITHUB_REPOSITORY}/pkgs/nuget/${packageId}`;
+      }
     } catch (error) {
       const message = redactToken(`${dotnet} push failed: ${(error as Error).message}`, token);
       context.logger.error(message);
@@ -52,6 +78,10 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
       throw new SemanticReleaseError(`publish to registry ${registryConfig.url} failed`, publishFailed, message);
     }
+  }
+
+  if (release.url !== undefined) {
+    return release;
   }
 };
 
@@ -122,4 +152,24 @@ async function prepareSourceAsync(
   await execa(dotnet, sourceAddOrUpdateArgs, { stdio: "inherit" });
 
   return sourceName;
+}
+
+/**
+ * Gets the name of the first NuGet package found in the given path that matches the new version.
+ * @param packagePath The path to the NuGet package files.
+ * @param newVersion The new Semantic Release version.
+ * @returns The name of the package.
+ */
+async function getFirstPackageNameAync(packagePath: string, newVersion: string): Promise<string | undefined> {
+  const files = await readdir(packagePath);
+  const nupkg = files.find((f) => f.endsWith(".nupkg") && !f.endsWith(".symbols.nupkg") && f.includes(newVersion));
+  if (!nupkg) {
+    return undefined;
+  }
+
+  // Package name is something like <namespace>.<project>.<version>.nupkg.
+  // It could also contain pre-release suffixes, e.g. `DroidSolutions.Oss.SemanticVersion.1.6.0-develop.4.nupkg`.
+  // Try to extract the version, and everything before the version is considered the package name.
+  // But we already have the version from Semantic Release.
+  return nupkg.replace(`.${newVersion}.nupkg`, "");
 }

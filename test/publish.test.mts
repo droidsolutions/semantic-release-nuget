@@ -9,9 +9,14 @@ jest.unstable_mockModule("execa", () => ({
   execa: jest.fn(),
 }));
 
+jest.unstable_mockModule("node:fs/promises", () => ({
+  readdir: jest.fn(),
+}));
+
 describe("publish", () => {
   let context: PublishContext;
   let execaMock: jest.Mock<typeof execa>;
+  let readdirMock: jest.Mock<any>;
   let publish: typeof publishType;
   const emptyResult: Partial<Result<Options>> = { stdout: "" };
 
@@ -34,6 +39,9 @@ describe("publish", () => {
     const execaImport = await import("execa");
     execaMock = execaImport.execa as unknown as jest.Mock<typeof execa>;
 
+    const fsImport = await import("node:fs/promises");
+    readdirMock = fsImport.readdir as unknown as jest.Mock<any>;
+
     const publishImport = await import("../src/publish.mjs");
     publish = publishImport.publish;
 
@@ -46,10 +54,12 @@ describe("publish", () => {
 
   afterEach(() => {
     execaMock.mockReset();
+    readdirMock.mockReset();
   });
 
   beforeEach(() => {
     execaMock.mockResolvedValue(emptyResult as Result<Options>);
+    readdirMock.mockResolvedValue([]);
   });
 
   it("should call execa with the correct arguments when given minimum config", async () => {
@@ -322,5 +332,53 @@ describe("publish", () => {
       ["nuget", "update", "source", "nuget", "-s", "https://api.nuget.org/v3/index.json"],
       { stdio: "inherit" },
     ]);
+  });
+
+  it("should return the package URL when publishing to NuGet", async () => {
+    readdirMock.mockResolvedValue(["My.Package.1.0.0.nupkg"]);
+    const result = await publish(
+      {
+        projectPath: "src/MyProject/MyProject.csproj",
+      },
+      context,
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        name: "My.Package",
+        pluginName: "@droidsolutions-oss/semantic-release-nuget",
+        url: "https://www.nuget.org/packages/My.Package/1.0.0",
+      }),
+    );
+  });
+
+  it("should return the package URL when publishing to GitHub", async () => {
+    readdirMock.mockResolvedValue(["My.Package.1.0.0.nupkg"]);
+
+    const result = await publish(
+      {
+        nugetRegistries: [
+          {
+            type: "github",
+          },
+        ],
+        projectPath: "src/MyProject/MyProject.csproj",
+      },
+      {
+        ...context,
+        env: {
+          GITHUB_REPOSITORY_OWNER: "droidsolutions",
+          GITHUB_REPOSITORY: "semantic-release-nuget",
+        },
+      },
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        name: "My.Package",
+        pluginName: "@droidsolutions-oss/semantic-release-nuget",
+        url: "https://github.com/droidsolutions/semantic-release-nuget/pkgs/nuget/My.Package",
+      }),
+    );
   });
 });
