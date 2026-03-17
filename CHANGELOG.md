@@ -1,3 +1,10 @@
+# [2.1.0-beta.4](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2026-03-17)
+
+
+### Bug Fixes
+
+* skip user/password when adding source for official NuGet server ([68a75a2](https://github.com/droidsolutions/semantic-release-nuget/commit/68a75a2ceb95af2ae9e799ae9a8a14c979a067f6))
+
 # [2.1.0-beta.3](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2026-03-17)
 
 
