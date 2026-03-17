@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
 import { join, resolve } from "path";
