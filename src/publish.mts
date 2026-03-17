@@ -110,13 +110,17 @@ async function prepareSourceAsync(
   // or dotnet nuget add <sourceUrl> --name <sourceName> ...
   const sourceAddOrUpdateArgs = ["nuget", sourceAction, "source", ...sourceSpecificArgs];
 
-  if (registryConfig.user) {
-    sourceAddOrUpdateArgs.push("--username", registryConfig.user);
+  // For the official NuGet only API token is needed, so we don't have to update the NuGet source here.
+  if (registryConfig.type !== "nuget") {
+    if (registryConfig.user) {
+      sourceAddOrUpdateArgs.push("--username", registryConfig.user);
+    }
+
+    // Add/Update the source with the token as password. --store-password-in-clear-text is required when running in CI,
+    // but it should not be persisted anyway.
+    sourceAddOrUpdateArgs.push("--password", token, "--store-password-in-clear-text");
   }
 
-  // Add/Update the source with the token as password. --store-password-in-clear-text is required when running in CI,
-  // but it should not be persisted anyway.
-  sourceAddOrUpdateArgs.push("--password", token, "--store-password-in-clear-text");
   await execa(dotnet, sourceAddOrUpdateArgs, { stdio: "inherit" });
 
   return sourceName;

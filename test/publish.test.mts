@@ -86,17 +86,7 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(3);
     expect(execaMock.mock.calls[1]).toEqual([
       "dotnet",
-      [
-        "nuget",
-        "add",
-        "source",
-        "https://gitlab.com/mygroup/myproject",
-        "--name",
-        "special",
-        "--password",
-        "104E4",
-        "--store-password-in-clear-text",
-      ],
+      ["nuget", "add", "source", "https://gitlab.com/mygroup/myproject", "--name", "special"],
       { stdio: "inherit" },
     ]);
   });
@@ -288,7 +278,7 @@ describe("publish", () => {
     ]);
   });
 
-  it("should use update existing NuGet source", async () => {
+  it("should update existing NuGet source", async () => {
     execaMock.mockImplementationOnce(() => {
       return {
         stdout: "Registered Sources:\n  1.  nuget [Enabled]\nhttps://api.nuget.org/v3/index.json\n",
@@ -329,17 +319,7 @@ describe("publish", () => {
     expect(execaMock).toHaveBeenCalledTimes(3);
     expect(execaMock.mock.calls[1]).toEqual([
       "dotnet",
-      [
-        "nuget",
-        "update",
-        "source",
-        "nuget",
-        "-s",
-        "https://api.nuget.org/v3/index.json",
-        "--password",
-        "B00BF", // use NUGET_TOKEN when project ID is given, since CI_JOB_TOKEN can only push to the current project
-        "--store-password-in-clear-text",
-      ],
+      ["nuget", "update", "source", "nuget", "-s", "https://api.nuget.org/v3/index.json"],
       { stdio: "inherit" },
     ]);
   });
