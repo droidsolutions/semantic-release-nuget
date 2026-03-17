@@ -36,6 +36,21 @@ export const extractNugetSourcesFromListOutput = (output: string): NuGetSource[]
   return sources;
 };
 
+/**
+ * Extracts the SDK version from the output of dotnet --info command.
+ * @param output The dotnet command output.
+ * @returns The SDK version parsed from the output.
+ */
+export const extractSdkVersionFromDotnetInfoOutput = (output: string): string | null => {
+  const regex = /SDK:\s+Version:\s+([^\s]+)/;
+  const match = regex.exec(output);
+  if (match && match.length > 1) {
+    return match[1]!;
+  }
+
+  return null;
+};
+
 export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] => {
   // Todo use CI_API_V4_URL instead of CI_SERVER_URL in the future. Possible breaking change.
   if (config.nugetRegistries && config.nugetRegistries.length > 0) {

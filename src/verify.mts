@@ -3,10 +3,10 @@ import { execa } from "execa";
 import { promises } from "fs";
 import { resolve } from "path";
 import type { Config, VerifyConditionsContext } from "semantic-release";
-import { normalizeRegistryConfig } from "./Helper.mjs";
+import { extractSdkVersionFromDotnetInfoOutput, normalizeRegistryConfig } from "./Helper.mjs";
 import type { UserConfig } from "./UserConfig.mjs";
 
-export const verify = async (pluginConfig: Config & UserConfig, _context: VerifyConditionsContext): Promise<void> => {
+export const verify = async (pluginConfig: Config & UserConfig, context: VerifyConditionsContext): Promise<void> => {
   const errors: Error[] = [];
 
   const registries = normalizeRegistryConfig(pluginConfig);
@@ -95,7 +95,13 @@ export const verify = async (pluginConfig: Config & UserConfig, _context: Verify
   const dotnet = pluginConfig.dotnet ?? "dotnet";
 
   try {
-    await execa(dotnet, ["--info"], { stdio: "inherit" });
+    const { exitCode: exitCode, stdout: output } = await execa(dotnet, ["--info"], {});
+    if (exitCode === 0) {
+      const version = extractSdkVersionFromDotnetInfoOutput(output);
+      context.logger.success(`Found .NET SDK version: ${version}`);
+    } else {
+      context.logger.error("Unable to determine .NET SDK version");
+    }
   } catch (_) {
     errors.push(new Error(`Unable to find dotnet executable in ${dotnet}`));
   }

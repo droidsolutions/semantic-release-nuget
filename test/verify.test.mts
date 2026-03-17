@@ -1,8 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import type SemanticReleaseError from "@semantic-release/error";
-import type { execa as execaType } from "execa";
+import type { execa as execaType, ResultPromise } from "execa";
 import type { VerifyConditionsContext } from "semantic-release";
 import type { UserConfig } from "../src/UserConfig.mjs";
+import { Readable } from "node:stream";
 
 jest.unstable_mockModule("execa", () => ({
   execa: jest.fn(),
@@ -20,7 +21,7 @@ describe("verify", () => {
     context = {
       branch: { name: "main" },
       env: {},
-      logger: { log: logMock, error: logMock } as any,
+      logger: { log: logMock, error: logMock, success: logMock } as any,
     } as VerifyConditionsContext;
     const { execa } = await import("execa");
     execaMock = execa as unknown as jest.Mock<typeof execaType>;
@@ -33,6 +34,11 @@ describe("verify", () => {
   });
 
   it("should report an error when NUGET_TOKEN is not set", async () => {
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
+
     let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ projectPath: "test/fixture/some.csproj" } as UserConfig, context);
@@ -83,10 +89,15 @@ describe("verify", () => {
     );
   });
 
-  it("should report an error when separate GitLab rpoject id is set but gitlabUser is missing", async () => {
+  it("should report an error when separate GitLab project id is set but gitlabUser is missing", async () => {
     delete process.env.CI_PROJECT_ID;
     process.env.NUGET_TOKEN = "104E2";
     process.env.CI_SERVER_URL = "gitlab.com";
+
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
 
     let actualErr: SemanticReleaseError | undefined;
     try {
@@ -108,6 +119,11 @@ describe("verify", () => {
     process.env.CI_SERVER_URL = "gitlab.com";
     process.env.CI_PROJECT_ID = "132";
 
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
+
     let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" } as UserConfig, context);
@@ -121,6 +137,11 @@ describe("verify", () => {
 
   it("should report an error when publishToGitlab is false and skipPublishToNuget is true", async () => {
     process.env.NUGET_TOKEN = "104E2";
+
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
 
     let actualErr: SemanticReleaseError | undefined;
     try {
@@ -178,6 +199,11 @@ describe("verify", () => {
     process.env.CI_PROJECT_ID = "132";
     process.env.CI_JOB_TOKEN = "a3lhjli";
 
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
+
     let actualErr: SemanticReleaseError | undefined;
     try {
       await verify({ projectPath: [], skipPublishToNuget: true, publishToGitLab: true } as UserConfig, context);
@@ -195,6 +221,11 @@ describe("verify", () => {
     process.env.CI_PROJECT_ID = "132";
     process.env.CI_JOB_TOKEN = "a3lhjli";
 
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
+
     const promise = verify(
       { projectPath: "test/fixture/some.csproj", skipPublishToNuget: true, publishToGitLab: true } as UserConfig,
       context,
@@ -208,6 +239,11 @@ describe("verify", () => {
       projectPath: "test/fixture/some.csproj",
       nugetRegistries: [{ name: "my-registry", url: "https://example.com" }],
     } as UserConfig;
+
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
 
     let actualErr: SemanticReleaseError | undefined;
     try {
@@ -226,6 +262,11 @@ describe("verify", () => {
       projectPath: "test/fixture/some.csproj",
       nugetRegistries: [{ name: "my-registry", url: "https://example.com", tokenEnvVar: "MY_TOKEN" }],
     } as UserConfig;
+
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
 
     let actualErr: SemanticReleaseError | undefined;
     try {
@@ -272,6 +313,11 @@ describe("verify", () => {
         },
       ],
     } as UserConfig;
+
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
 
     await expect(verify(config, context)).resolves.toBeUndefined();
   });
@@ -327,6 +373,11 @@ describe("verify", () => {
     process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
     process.env.GITHUB_TOKEN = "104E2";
     process.env.GITHUB_ACTOR = "somebody";
+
+    execaMock.mockReturnValueOnce({
+      exitCode: 0,
+      stdout: ".NET SDK:\nVersion:           10.0.201\nCommit:            4d3023de60",
+    } as unknown as ResultPromise);
 
     const config = {
       projectPath: "test/fixture/some.csproj",
