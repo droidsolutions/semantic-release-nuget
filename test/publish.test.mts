@@ -177,7 +177,7 @@ describe("publish", () => {
     );
 
     expect(execaMock).toHaveBeenCalledTimes(1);
-    expect(execaMock.mock.calls[0]).toEqual(["dotnet", ["nuget", "list", "source"]]);
+    expect(execaMock.mock.calls[0]).toEqual(["dotnet", ["nuget", "list", "source", "--format", "Detailed"]]);
   });
 
   it("should publish to nugetServer when skipPublishToNuget is false", async () => {

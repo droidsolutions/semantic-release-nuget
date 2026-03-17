@@ -3,10 +3,11 @@
 import SemanticReleaseError from "@semantic-release/error";
 import { execa } from "execa";
 import { join, resolve } from "path";
-import type { Config, PublishContext } from "semantic-release";
+import type { Config, PublishContext, VerifyReleaseContext } from "semantic-release";
 import { extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed } from "./Helper.mjs";
 import type { NuGetSource } from "./NuGetSource.mjs";
 import type { UserConfig } from "./UserConfig.mjs";
+import { RegistryConfig } from "./RegistryConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<void> => {
   const dotnet = pluginConfig.dotnet ?? "dotnet";
@@ -15,61 +16,22 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
   const registries = normalizeRegistryConfig(pluginConfig);
 
+  // Parse sources from nuget.config
   let sources: NuGetSource[] = [];
   try {
-    const { stdout } = await execa(dotnet, ["nuget", "list", "source"]);
+    const { stdout } = await execa(dotnet, ["nuget", "list", "source", "--format", "Detailed"]);
     sources = extractNugetSourcesFromListOutput(stdout);
   } catch (err) {
     context.logger.error(`Failed to list NuGet sources: ${(err as Error).message}`);
   }
 
+  // For each registry, prepare the source and push the package.
   for (const registryConfig of registries) {
+    context.logger.log(`Publishing to registry ${registryConfig.url} using config ${registryConfig.name} ...`);
     const token: string = process.env[registryConfig.tokenEnvVar!]!;
 
     try {
-      // if (registryConfig.type === "nuget") {
-      //   const cliArgs: string[] = [...baseCliArgs, "-s", registryConfig.url!, "-k", token];
-
-      //   cliArgs.push(join(packagePath, "*.nupkg"));
-
-      //   const argStrings = cliArgs.join(" ");
-      //   context.logger.log(redactToken(`running command "${dotnet} ${argStrings}" ...`, token));
-
-      //   await execa(dotnet, cliArgs, {stdio: "inherit"});
-      //   continue;
-      // }
-
-      const source = sources?.find((s) => s.url === registryConfig.url);
-      let sourceName = registryConfig.name!;
-      let sourceAction: "add" | "update" = "add";
-      const sourceSpecificArgs: string[] = [];
-
-      if (source) {
-        if (source.enabled) {
-          context.logger.log(`A NuGet source with the needed url already exists, using source ${source.source}.`);
-          sourceName = source.source;
-        } else {
-          context.logger.log(`Enabling the existing NuGet source ${source.source}.`);
-          await execa(dotnet, ["nuget", "enable", "source", source.source], { stdio: "inherit" });
-          sourceName = source.source;
-        }
-
-        sourceAction = "update";
-        sourceSpecificArgs.push(sourceName, "-s", registryConfig.url!);
-      } else {
-        context.logger.log(`Adding a NuGet source for ${registryConfig.url}`);
-        sourceAction = "add";
-        sourceSpecificArgs.push(registryConfig.url!, "--name", sourceName);
-      }
-
-      const sourceAddOrUpdateArgs = ["nuget", sourceAction, "source", ...sourceSpecificArgs];
-
-      if (registryConfig.user) {
-        sourceAddOrUpdateArgs.push("--username", registryConfig.user);
-      }
-
-      sourceAddOrUpdateArgs.push("--password", token, "--store-password-in-clear-text");
-      await execa(dotnet, sourceAddOrUpdateArgs, { stdio: "inherit" });
+      const sourceName = await prepareSourceAsync(sources, registryConfig, context, dotnet, token);
 
       const cliArgs: string[] = [...baseCliArgs, "-s", sourceName, "-k", token, join(packagePath, "*.nupkg")];
 
@@ -98,3 +60,64 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 const redactToken = (message: string, token: string): string => {
   return message.replaceAll(token, "[REDACTED]");
 };
+
+/**
+ * Prepares a NuGet source for publishing by either adding a new source or updating an existing one with the given
+ * registry configuration.
+ * @param sources A list of sources parsed from 'dotnet nuget list source'.
+ * @param registryConfig The registry configurations.
+ * @param context The Semantic Release context.
+ * @param dotnet The dotnet executable.
+ * @param token The authentication token for the NuGet server.
+ * @returns The name of the source that was prepared for publish.
+ */
+async function prepareSourceAsync(
+  sources: NuGetSource[],
+  registryConfig: RegistryConfig,
+  context: VerifyReleaseContext,
+  dotnet: string,
+  token: string,
+) {
+  // First check if a source with the given url is already in nuget.config.
+  // Try to find an enabled source first, if not possible, use a disabled one.
+  let sourceEntry = sources?.find((s) => s.url === registryConfig.url && s.enabled);
+  sourceEntry ??= sources?.find((s) => s.url === registryConfig.url);
+  let sourceName = registryConfig.name!; // use given name from config as default
+  let sourceAction: "add" | "update";
+  const sourceSpecificArgs: string[] = [];
+
+  if (sourceEntry) {
+    // If a source exists, update it
+    if (sourceEntry.enabled) {
+      sourceName = sourceEntry.source;
+      context.logger.log(`A NuGet source with the needed url already exists, using source ${sourceName}.`);
+    } else {
+      sourceName = sourceEntry.source;
+      context.logger.log(`Temporary enabling the existing NuGet source ${sourceName}.`);
+      await execa(dotnet, ["nuget", "enable", "source", sourceName], { stdio: "inherit" });
+    }
+
+    sourceAction = "update";
+    sourceSpecificArgs.push(sourceName, "-s", registryConfig.url!);
+  } else {
+    // If no source exists, temporary add one
+    context.logger.log(`Adding a NuGet source for ${registryConfig.url}`);
+    sourceAction = "add";
+    sourceSpecificArgs.push(registryConfig.url!, "--name", sourceName);
+  }
+
+  // Command looks like dotnet nuget update <sourceName> -s <sourceUrl> ...
+  // or dotnet nuget add <sourceUrl> --name <sourceName> ...
+  const sourceAddOrUpdateArgs = ["nuget", sourceAction, "source", ...sourceSpecificArgs];
+
+  if (registryConfig.user) {
+    sourceAddOrUpdateArgs.push("--username", registryConfig.user);
+  }
+
+  // Add/Update the source with the token as password. --store-password-in-clear-text is required when running in CI,
+  // but it should not be persisted anyway.
+  sourceAddOrUpdateArgs.push("--password", token, "--store-password-in-clear-text");
+  await execa(dotnet, sourceAddOrUpdateArgs, { stdio: "inherit" });
+
+  return sourceName;
+}
