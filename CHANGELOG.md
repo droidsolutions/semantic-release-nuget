@@ -1,3 +1,38 @@
+# [2.1.0-beta.4](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2026-03-17)
+
+
+### Bug Fixes
+
+* skip user/password when adding source for official NuGet server ([68a75a2](https://github.com/droidsolutions/semantic-release-nuget/commit/68a75a2ceb95af2ae9e799ae9a8a14c979a067f6))
+
+# [2.1.0-beta.3](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2026-03-17)
+
+
+### Bug Fixes
+
+* use gitlab_private instead of gitlab for type ([3fdc174](https://github.com/droidsolutions/semantic-release-nuget/commit/3fdc1746a370829beb860721509b97a8824618cb))
+
+# [2.1.0-beta.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.1...v2.1.0-beta.2) (2026-03-16)
+
+
+### Bug Fixes
+
+* always use source, even for default NuGet server ([5e22017](https://github.com/droidsolutions/semantic-release-nuget/commit/5e220178c649ae5f5827416a0775f4dc967af792))
+
+# [2.1.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.1...v2.1.0-beta.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* always redact token in logs ([4988757](https://github.com/droidsolutions/semantic-release-nuget/commit/4988757a1b517015b7f63507dea3506e02174b1b))
+
+
+### Features
+
+* add support for multiple registries with new config ([4b887e6](https://github.com/droidsolutions/semantic-release-nuget/commit/4b887e6396387e9f054ef88c200ee61adfc49fcb))
+* add support for publish to GitHub registry ([451e574](https://github.com/droidsolutions/semantic-release-nuget/commit/451e574fc8f12e8d5551b18ab987d1e64460c46b))
+* parse sources from nuget.config ([a16d0a0](https://github.com/droidsolutions/semantic-release-nuget/commit/a16d0a0befeb7512375ab20f823007ed16f28418))
+
 ## [2.0.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.0...v2.0.1) (2024-01-10)
 
 
