@@ -1,3 +1,10 @@
+# [2.1.0-beta.6](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.5...v2.1.0-beta.6) (2026-03-17)
+
+
+### Features
+
+* add NuGet package url to publish result ([afa48e1](https://github.com/droidsolutions/semantic-release-nuget/commit/afa48e158a8564d33e1c8f274a3fcc6e23ab72c5))
+
 # [2.1.0-beta.5](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.4...v2.1.0-beta.5) (2026-03-17)
 
 
