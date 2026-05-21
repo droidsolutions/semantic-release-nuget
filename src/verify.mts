@@ -39,9 +39,13 @@ export const verify = async (pluginConfig: Config & UserConfig, context: VerifyC
       errors.push(new Error(`Registry ${registry.name} has no url configured.`));
     }
 
-    if (registry.type === "github" && !registry.user) {
-      if (!process.env.GITHUB_ACTOR) {
+    if (registry.type === "github") {
+      if (!registry.user && !process.env.GITHUB_ACTOR) {
         errors.push(new Error("GITHUB_ACTOR environment variable is not set but needed for GitHub registry."));
+      }
+
+      if (!process.env.GITHUB_REPOSITORY) {
+        errors.push(new Error("GITHUB_REPOSITORY environment variable is not set but needed for GitHub registry."));
       }
     }
 

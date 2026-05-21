@@ -368,10 +368,36 @@ describe("verify", () => {
     );
   });
 
+  it("should report an error when GitHub registry is configured but GITHUB_REPOSITORY is not set", async () => {
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+    process.env.GITHUB_TOKEN = "104E2";
+    process.env.GITHUB_ACTOR = "somebody";
+    delete process.env.GITHUB_REPOSITORY;
+
+    let actualErr: SemanticReleaseError | undefined;
+    try {
+      await verify(
+        {
+          projectPath: "test/fixture/some.csproj",
+          nugetRegistries: [{ type: "github" }],
+        } as UserConfig,
+        context,
+      );
+    } catch (err) {
+      actualErr = err as SemanticReleaseError;
+    }
+
+    expect(actualErr).toBeDefined();
+    expect(actualErr?.details).toContain(
+      "GITHUB_REPOSITORY environment variable is not set but needed for GitHub registry.",
+    );
+  });
+
   it("should verify successfully when GitHub registry is configured with all environment variables", async () => {
     process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
     process.env.GITHUB_TOKEN = "104E2";
     process.env.GITHUB_ACTOR = "somebody";
+    process.env.GITHUB_REPOSITORY = "semantic-release-nuget";
 
     execaMock.mockReturnValueOnce({
       exitCode: 0,
