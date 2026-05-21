@@ -56,9 +56,7 @@ export const normalizeRegistryConfig = (config: UserConfig): RegistryConfig[] =>
   if (config.nugetRegistries && config.nugetRegistries.length > 0) {
     return config.nugetRegistries.map((registry) => {
       const normalized: RegistryConfig = { ...registry };
-      if (normalized.type === undefined || normalized.type === null || (normalized.type as unknown as string) === "") {
-        normalized.type = "nuget";
-      }
+      normalized.type ??= "nuget";
 
       if (typeof normalized.name === "string") {
         normalized.name = normalized.name.trim();
