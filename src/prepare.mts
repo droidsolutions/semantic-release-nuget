@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import SRError from "@semantic-release/error";
 import { execa } from "execa";
 import { resolve } from "path";

@@ -1,3 +1,60 @@
+# [2.1.0-beta.7](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.6...v2.1.0-beta.7) (2026-05-21)
+
+
+### Bug Fixes
+
+* **publish:** hande undefined packageId ([df09939](https://github.com/droidsolutions/semantic-release-nuget/commit/df09939f5d04d3d08c3dec3236fd8e59a005daba))
+* **verify:** add error handling for missing GITHUB_REPOSITORY in GitHub registry ([982c0fb](https://github.com/droidsolutions/semantic-release-nuget/commit/982c0fb820a12b89fd4d044c08cd390d69776640))
+
+# [2.1.0-beta.6](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.5...v2.1.0-beta.6) (2026-03-17)
+
+
+### Features
+
+* add NuGet package url to publish result ([afa48e1](https://github.com/droidsolutions/semantic-release-nuget/commit/afa48e158a8564d33e1c8f274a3fcc6e23ab72c5))
+
+# [2.1.0-beta.5](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.4...v2.1.0-beta.5) (2026-03-17)
+
+
+### Features
+
+* shorten output of verify step ([dccab73](https://github.com/droidsolutions/semantic-release-nuget/commit/dccab73bd77ad5b4535326f23dbbf2c55b05ef92))
+
+# [2.1.0-beta.4](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.3...v2.1.0-beta.4) (2026-03-17)
+
+
+### Bug Fixes
+
+* skip user/password when adding source for official NuGet server ([68a75a2](https://github.com/droidsolutions/semantic-release-nuget/commit/68a75a2ceb95af2ae9e799ae9a8a14c979a067f6))
+
+# [2.1.0-beta.3](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.2...v2.1.0-beta.3) (2026-03-17)
+
+
+### Bug Fixes
+
+* use gitlab_private instead of gitlab for type ([3fdc174](https://github.com/droidsolutions/semantic-release-nuget/commit/3fdc1746a370829beb860721509b97a8824618cb))
+
+# [2.1.0-beta.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.1...v2.1.0-beta.2) (2026-03-16)
+
+
+### Bug Fixes
+
+* always use source, even for default NuGet server ([5e22017](https://github.com/droidsolutions/semantic-release-nuget/commit/5e220178c649ae5f5827416a0775f4dc967af792))
+
+# [2.1.0-beta.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.1...v2.1.0-beta.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* always redact token in logs ([4988757](https://github.com/droidsolutions/semantic-release-nuget/commit/4988757a1b517015b7f63507dea3506e02174b1b))
+
+
+### Features
+
+* add support for multiple registries with new config ([4b887e6](https://github.com/droidsolutions/semantic-release-nuget/commit/4b887e6396387e9f054ef88c200ee61adfc49fcb))
+* add support for publish to GitHub registry ([451e574](https://github.com/droidsolutions/semantic-release-nuget/commit/451e574fc8f12e8d5551b18ab987d1e64460c46b))
+* parse sources from nuget.config ([a16d0a0](https://github.com/droidsolutions/semantic-release-nuget/commit/a16d0a0befeb7512375ab20f823007ed16f28418))
+
 ## [2.0.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.0...v2.0.1) (2024-01-10)
 
 

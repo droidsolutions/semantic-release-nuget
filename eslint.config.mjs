@@ -21,7 +21,7 @@ export default defineConfig(
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
-      sourceType: "commonjs",
+      sourceType: "module",
     },
 
     plugins: {
@@ -68,7 +68,7 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsConfigRootDir: import.meta.dirname,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
 
