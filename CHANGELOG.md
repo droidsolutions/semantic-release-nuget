@@ -1,3 +1,11 @@
+# [2.1.0-beta.7](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.6...v2.1.0-beta.7) (2026-05-21)
+
+
+### Bug Fixes
+
+* **publish:** hande undefined packageId ([df09939](https://github.com/droidsolutions/semantic-release-nuget/commit/df09939f5d04d3d08c3dec3236fd8e59a005daba))
+* **verify:** add error handling for missing GITHUB_REPOSITORY in GitHub registry ([982c0fb](https://github.com/droidsolutions/semantic-release-nuget/commit/982c0fb820a12b89fd4d044c08cd390d69776640))
+
 # [2.1.0-beta.6](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0-beta.5...v2.1.0-beta.6) (2026-03-17)
 
 
