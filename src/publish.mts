@@ -5,7 +5,7 @@ import { join, resolve } from "path";
 import type { Config, PublishContext, Release, VerifyReleaseContext } from "semantic-release";
 import { extractNugetSourcesFromListOutput, isExecaError, normalizeRegistryConfig, publishFailed } from "./Helper.mjs";
 import type { NuGetSource } from "./NuGetSource.mjs";
-import { RegistryConfig } from "./RegistryConfig.mjs";
+import type { RegistryConfig } from "./RegistryConfig.mjs";
 import type { UserConfig } from "./UserConfig.mjs";
 
 export const publish = async (pluginConfig: Config & UserConfig, context: PublishContext): Promise<Release | void> => {
@@ -13,7 +13,7 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
   const packagePath = resolve("out");
   const baseCliArgs: string[] = ["nuget", "push"];
 
-  const packageId = await getFirstPackageNameAync(packagePath, context.nextRelease.version);
+  const packageId = await getFirstPackageNameAsync(packagePath, context.nextRelease.version);
 
   const release: Release = {
     gitHead: context.nextRelease.gitHead,
@@ -50,13 +50,19 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 
       await execa(dotnet, cliArgs, { stdio: "inherit" });
 
-      if (registryConfig.type === "nuget") {
+      if (registryConfig.type === "nuget" && packageId) {
         // For NuGet.org we can determine the release URL.
         release.url = `https://www.nuget.org/packages/${packageId}/${context.nextRelease.version}`;
       }
 
-      if (registryConfig.type === "github" && release.url === undefined) {
-        // If we don't already have a NuGet package, we can use the GitHub package if there is one.
+      if (
+        registryConfig.type === "github" &&
+        release.url === undefined &&
+        packageId &&
+        context.env.GITHUB_REPOSITORY_OWNER &&
+        context.env.GITHUB_REPOSITORY
+      ) {
+        // If we don't already have a NuGet package URL, we can use the GitHub package if there is one.
         // Unfortunately GitHub package links have an arbitrary ID, so we can only link to the general package page.
         // This is something like <orga>/<repo>/pkgs/nuget/<packageId>.
         // Example: https://github.com/droidsolutions/semantic-version/pkgs/nuget/DroidSolutions.Oss.SemanticVersion
@@ -86,6 +92,10 @@ export const publish = async (pluginConfig: Config & UserConfig, context: Publis
 };
 
 const redactToken = (message: string, token: string): string => {
+  if (!token) {
+    return message;
+  }
+
   return message.replaceAll(token, "[REDACTED]");
 };
 
@@ -160,7 +170,7 @@ async function prepareSourceAsync(
  * @param newVersion The new Semantic Release version.
  * @returns The name of the package.
  */
-async function getFirstPackageNameAync(packagePath: string, newVersion: string): Promise<string | undefined> {
+async function getFirstPackageNameAsync(packagePath: string, newVersion: string): Promise<string | undefined> {
   const files = await readdir(packagePath);
   const nupkg = files.find((f) => f.endsWith(".nupkg") && !f.endsWith(".symbols.nupkg") && f.includes(newVersion));
   if (!nupkg) {

@@ -381,4 +381,44 @@ describe("publish", () => {
       }),
     );
   });
+
+  it("should return void when no .nupkg file matches the version", async () => {
+    readdirMock.mockResolvedValue(["My.Package.0.9.0.nupkg"]);
+    const result = await publish({ projectPath: "src/MyProject/MyProject.csproj" }, context);
+    expect(result).toBeUndefined();
+  });
+
+  it("should not set a malformed GitHub release URL when packageId is undefined", async () => {
+    // readdirMock returns [] by default (no .nupkg found → packageId = undefined)
+    process.env.GITHUB_TOKEN = "some-token";
+    process.env.GITHUB_ACTOR = "somebody";
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+
+    const result = await publish(
+      {
+        nugetRegistries: [{ type: "github" }],
+        projectPath: "src/MyProject/MyProject.csproj",
+      },
+      { ...context, env: { GITHUB_REPOSITORY_OWNER: "droidsolutions", GITHUB_REPOSITORY: "my-repo" } },
+    );
+
+    expect(result).toBeUndefined();
+  });
+
+  it("should not set GitHub release URL when GITHUB_REPOSITORY is missing from context.env", async () => {
+    readdirMock.mockResolvedValue(["My.Package.1.0.0.nupkg"]);
+    process.env.GITHUB_TOKEN = "some-token";
+    process.env.GITHUB_ACTOR = "somebody";
+    process.env.GITHUB_REPOSITORY_OWNER = "droidsolutions";
+
+    const result = await publish(
+      {
+        nugetRegistries: [{ type: "github" }],
+        projectPath: "src/MyProject/MyProject.csproj",
+      },
+      { ...context, env: { GITHUB_REPOSITORY_OWNER: "droidsolutions" } },
+    );
+
+    expect(result).toBeUndefined();
+  });
 });
