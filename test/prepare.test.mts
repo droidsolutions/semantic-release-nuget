@@ -11,7 +11,7 @@ jest.unstable_mockModule("execa", () => ({
 describe("prepare", () => {
   let context: PrepareContext;
   let prepare: typeof prepareType;
-  let execaMock: jest.Mock<typeof execa>;
+  let execaMock: jest.MockedFunction<typeof execa>;
 
   beforeAll(async () => {
     const logMock = jest.fn();
@@ -23,7 +23,7 @@ describe("prepare", () => {
     } as PrepareContext;
 
     const execaImport = await import("execa");
-    execaMock = execaImport.execa as unknown as jest.Mock<typeof execa>;
+    execaMock = jest.mocked(execaImport.execa);
 
     const prepareImport = await import("../src/prepare.mjs");
     prepare = prepareImport.prepare;

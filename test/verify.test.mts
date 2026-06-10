@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import type SemanticReleaseError from "@semantic-release/error";
-import type { execa as execaType, ResultPromise } from "execa";
+import type { ResultPromise } from "execa";
 import type { VerifyConditionsContext } from "semantic-release";
 import type { UserConfig } from "../src/UserConfig.mjs";
 
@@ -11,7 +11,7 @@ jest.unstable_mockModule("execa", () => ({
 describe("verify", () => {
   let originalEnv: NodeJS.ProcessEnv;
   let context: VerifyConditionsContext;
-  let execaMock: jest.Mock<typeof execaType>;
+  let execaMock: jest.MockedFunction<typeof import("execa").execa>;
   let verify: (pluginConfig: UserConfig, _context: VerifyConditionsContext) => Promise<void>;
 
   beforeAll(async () => {
@@ -23,7 +23,7 @@ describe("verify", () => {
       logger: { log: logMock, error: logMock, success: logMock } as any,
     } as VerifyConditionsContext;
     const { execa } = await import("execa");
-    execaMock = execa as unknown as jest.Mock<typeof execaType>;
+    execaMock = jest.mocked(execa);
     const verifyImport = await import("../src/verify.mjs");
     verify = verifyImport.verify;
   });
@@ -40,7 +40,7 @@ describe("verify", () => {
 
     let actualErr: SemanticReleaseError | undefined;
     try {
-      await verify({ projectPath: "test/fixture/some.csproj" } as UserConfig, context);
+      await verify({ projectPath: "test/fixture/some.csproj" }, context);
     } catch (err) {
       actualErr = err as SemanticReleaseError;
     }
@@ -57,7 +57,7 @@ describe("verify", () => {
 
     let actualErr: SemanticReleaseError | undefined;
     try {
-      await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" } as UserConfig, context);
+      await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" }, context);
     } catch (err) {
       actualErr = err as SemanticReleaseError;
     }
@@ -76,7 +76,7 @@ describe("verify", () => {
 
     let actualErr: SemanticReleaseError | undefined;
     try {
-      await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" } as UserConfig, context);
+      await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" }, context);
     } catch (err) {
       actualErr = err as SemanticReleaseError;
     }
@@ -101,7 +101,7 @@ describe("verify", () => {
     let actualErr: SemanticReleaseError | undefined;
     try {
       await verify(
-        { publishToGitLab: true, projectPath: "test/fixture/some.csproj", gitlabRegistryProjectId: 42 } as UserConfig,
+        { publishToGitLab: true, projectPath: "test/fixture/some.csproj", gitlabRegistryProjectId: 42 },
         context,
       );
     } catch (err) {
@@ -125,7 +125,7 @@ describe("verify", () => {
 
     let actualErr: SemanticReleaseError | undefined;
     try {
-      await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" } as UserConfig, context);
+      await verify({ publishToGitLab: true, projectPath: "test/fixture/some.csproj" }, context);
     } catch (err) {
       actualErr = err as SemanticReleaseError;
     }
@@ -145,7 +145,7 @@ describe("verify", () => {
     let actualErr: SemanticReleaseError | undefined;
     try {
       await verify(
-        { publishToGitLab: false, skipPublishToNuget: true, projectPath: "test/fixture/some.csproj" } as UserConfig,
+        { publishToGitLab: false, skipPublishToNuget: true, projectPath: "test/fixture/some.csproj" },
         context,
       );
     } catch (err) {
@@ -161,10 +161,7 @@ describe("verify", () => {
 
     let actualErr: SemanticReleaseError | undefined;
     try {
-      await verify(
-        { projectPath: ["test/fixture/some-missing.csproj", "test/fixture/some.csproj"] } as UserConfig,
-        context,
-      );
+      await verify({ projectPath: ["test/fixture/some-missing.csproj", "test/fixture/some.csproj"] }, context);
     } catch (err) {
       actualErr = err as SemanticReleaseError;
     }
@@ -183,7 +180,7 @@ describe("verify", () => {
 
     let actualErr: SemanticReleaseError | undefined;
     try {
-      await verify({ projectPath: "test/fixture/some.csproj" } as UserConfig, context);
+      await verify({ projectPath: "test/fixture/some.csproj" }, context);
     } catch (err) {
       actualErr = err as SemanticReleaseError;
     }
@@ -205,7 +202,7 @@ describe("verify", () => {
 
     let actualErr: SemanticReleaseError | undefined;
     try {
-      await verify({ projectPath: [], skipPublishToNuget: true, publishToGitLab: true } as UserConfig, context);
+      await verify({ projectPath: [], skipPublishToNuget: true, publishToGitLab: true }, context);
     } catch (err) {
       actualErr = err as SemanticReleaseError;
     }
@@ -226,7 +223,7 @@ describe("verify", () => {
     } as unknown as ResultPromise);
 
     const promise = verify(
-      { projectPath: "test/fixture/some.csproj", skipPublishToNuget: true, publishToGitLab: true } as UserConfig,
+      { projectPath: "test/fixture/some.csproj", skipPublishToNuget: true, publishToGitLab: true },
       context,
     );
 
@@ -331,7 +328,7 @@ describe("verify", () => {
         {
           projectPath: "test/fixture/some.csproj",
           nugetRegistries: [{ type: "github" }],
-        } as UserConfig,
+        },
         context,
       );
     } catch (err) {
@@ -355,7 +352,7 @@ describe("verify", () => {
         {
           projectPath: "test/fixture/some.csproj",
           nugetRegistries: [{ type: "github" }],
-        } as UserConfig,
+        },
         context,
       );
     } catch (err) {
@@ -380,7 +377,7 @@ describe("verify", () => {
         {
           projectPath: "test/fixture/some.csproj",
           nugetRegistries: [{ type: "github" }],
-        } as UserConfig,
+        },
         context,
       );
     } catch (err) {
