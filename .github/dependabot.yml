@@ -11,6 +11,10 @@ updates:
     assignees:
       - "Kampfmoehre"
   - directory: /
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
     groups:
       commitlint:
         patterns:
