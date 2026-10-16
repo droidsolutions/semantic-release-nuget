@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0...v2.1.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* require Node.js 22 ([3d67b90](https://github.com/droidsolutions/semantic-release-nuget/commit/3d67b90227f3cbd9b2a46196098e0f5fa79464f5))
+
 # [2.1.0](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.0.1...v2.1.0) (2026-05-21)
 
 
