@@ -16,7 +16,7 @@ jest.unstable_mockModule("node:fs/promises", () => ({
 describe("publish", () => {
   let context: PublishContext;
   let execaMock: jest.MockedFunction<typeof execa>;
-  let readdirMock: jest.Mock<any>;
+  let readdirMock: jest.Mock<(path: string) => Promise<string[]>>;
   let publish: typeof publishType;
   const emptyResult: Partial<Result<Options>> = { stdout: "" };
 
@@ -40,7 +40,7 @@ describe("publish", () => {
     execaMock = jest.mocked(execaImport.execa);
 
     const fsImport = await import("node:fs/promises");
-    readdirMock = fsImport.readdir as unknown as jest.Mock<any>;
+    readdirMock = fsImport.readdir as unknown as typeof readdirMock;
 
     const publishImport = await import("../src/publish.mjs");
     publish = publishImport.publish;
