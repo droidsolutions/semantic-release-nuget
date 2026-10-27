@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.1...v2.1.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* **deps:** bump execa from 10.1.1 to 10.2.1 ([1b5e170](https://github.com/droidsolutions/semantic-release-nuget/commit/1b5e170281742a60a270508e57c7f7224390f643))
+
 ## [2.1.1](https://github.com/droidsolutions/semantic-release-nuget/compare/v2.1.0...v2.1.1) (2026-10-16)
 
 
